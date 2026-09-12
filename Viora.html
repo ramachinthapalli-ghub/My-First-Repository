@@ -1,1043 +1,502 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Viora — Intuitive Parenting Companion</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --bg: #fffaf6;
-      --surface: #ffffff;
-      --surface-subtle: #fff4ed;
-      --ink: #111827;
-      --muted: #64748b;
-      --border: #f1e6de;
-      --accent: #ff6542;
-      --accent-hover: #e55332;
-      --accent-gradient: linear-gradient(135deg, #ff6542 0%, #ff8c53 50%, #8b5cf6 100%);
-      --accent-soft: #fff1eb;
-      --emerald: #10b981;
-      --emerald-soft: #ecfdf5;
-      --shadow: 0 20px 50px rgba(45, 30, 75, 0.12);
-      --radius: 20px;
-    }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-      background:
-        radial-gradient(circle at 10% 10%, rgba(255, 101, 66, 0.15), transparent 30%),
-        radial-gradient(circle at 90% 20%, rgba(139, 92, 246, 0.12), transparent 28%),
-        radial-gradient(circle at 50% 90%, rgba(16, 185, 129, 0.08), transparent 30%),
-        var(--bg);
-      color: var(--ink);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-
-    header {
-      width: 100%;
-      max-width: 1280px;
-      margin: 0 auto;
-      padding: 14px 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .brand-mark {
-      width: 36px;
-      height: 36px;
-      border-radius: 12px;
-      background: var(--accent-gradient);
-      color: white;
-      font-weight: 800;
-      display: grid;
-      place-items: center;
-      box-shadow: 0 4px 12px rgba(255, 101, 66, 0.25);
-    }
-
-    .brand-title {
-      font-weight: 800;
-      font-size: 18px;
-      letter-spacing: -0.5px;
-    }
-
-    .brand-tag {
-      font-size: 12px;
-      color: var(--muted);
-      margin-left: 8px;
-    }
-
-    .top-actions {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-    }
-
-    .pill-btn {
-      border: 1px solid var(--border);
-      background: white;
-      padding: 8px 14px;
-      border-radius: 12px;
-      font-size: 12px;
-      font-weight: 700;
-      color: var(--ink);
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      transition: all 0.15s ease;
-    }
-
-    .pill-btn:hover { background: #faf8f6; }
-    .pill-btn.accent {
-      background: var(--accent-soft);
-      border-color: #ffd8ca;
-      color: #b03a1a;
-    }
-
-    .shell {
-      flex: 1;
-      width: 100%;
-      max-width: 1280px;
-      margin: 0 auto;
-      display: grid;
-      grid-template-columns: 320px 410px 300px;
-      gap: 32px;
-      justify-content: center;
-      align-items: center;
-      padding: 20px;
-    }
-
-    .side {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-
-    .side h2 {
-      font-size: 28px;
-      line-height: 1.15;
-      letter-spacing: -0.8px;
-      color: #0f172a;
-    }
-
-    .side p {
-      color: var(--muted);
-      font-size: 13px;
-      line-height: 1.6;
-    }
-
-    .flow-steps {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      margin-top: 10px;
-    }
-
-    .step-item {
-      display: flex;
-      gap: 12px;
-      padding: 10px 12px;
-      border-radius: 14px;
-      cursor: pointer;
-      transition: all 0.15s ease;
-      background: transparent;
-      border: 1px solid transparent;
-      text-align: left;
-    }
-
-    .step-item:hover { background: rgba(255,255,255,0.7); }
-    .step-item.active {
-      background: white;
-      border-color: #ffdcd1;
-      box-shadow: 0 4px 14px rgba(255, 101, 66, 0.08);
-    }
-
-    .step-num {
-      width: 26px;
-      height: 26px;
-      border-radius: 50%;
-      background: #f1ece8;
-      color: var(--muted);
-      display: grid;
-      place-items: center;
-      font-size: 11px;
-      font-weight: 800;
-      flex-shrink: 0;
-    }
-
-    .step-item.active .step-num {
-      background: var(--accent-gradient);
-      color: white;
-    }
-
-    .step-text b { font-size: 13px; color: var(--ink); display: block; }
-    .step-text span { font-size: 11px; color: var(--muted); }
-
-    /* Phone Simulator Frame */
-    .phone {
-      width: 400px;
-      height: 800px;
-      background: white;
-      border-radius: 46px;
-      border: 10px solid #1e293b;
-      box-shadow: var(--shadow);
-      position: relative;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .status-bar {
-      height: 38px;
-      padding: 0 24px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 12px;
-      font-weight: 700;
-      background: white;
-      z-index: 10;
-    }
-
-    .island {
-      width: 80px;
-      height: 18px;
-      background: #1e293b;
-      border-radius: 999px;
-    }
-
-    .screen {
-      flex: 1;
-      overflow-y: auto;
-      padding: 16px 20px 24px;
-      display: none;
-      flex-direction: column;
-      background: white;
-    }
-
-    .screen.active { display: flex; }
-
-    .top-nav {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
-    }
-
-    .icon-btn {
-      width: 34px;
-      height: 34px;
-      border-radius: 50%;
-      background: #f8f6f4;
-      border: none;
-      cursor: pointer;
-      display: grid;
-      place-items: center;
-      font-size: 14px;
-      color: var(--ink);
-    }
-
-    .icon-btn:hover { background: #eee9e5; }
-
-    .step-counter {
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--muted);
-    }
-
-    .progress {
-      height: 5px;
-      background: #f1ece8;
-      border-radius: 999px;
-      overflow: hidden;
-      margin-bottom: 18px;
-    }
-
-    .progress-bar {
-      height: 100%;
-      background: var(--accent-gradient);
-      border-radius: 999px;
-      transition: width 0.3s ease;
-    }
-
-    h3.screen-title {
-      font-size: 22px;
-      font-weight: 800;
-      letter-spacing: -0.6px;
-      margin-bottom: 4px;
-    }
-
-    p.screen-sub {
-      font-size: 12px;
-      color: var(--muted);
-      line-height: 1.5;
-      margin-bottom: 16px;
-    }
-
-    /* Hero Cards */
-    .hero-card {
-      border-radius: 24px;
-      background: linear-gradient(135deg, #fff0e8 0%, #ffe1d5 50%, #f4edff 100%);
-      padding: 20px;
-      position: relative;
-      overflow: hidden;
-      border: 1px solid #ffdcd0;
-      margin-bottom: 16px;
-    }
-
-    .hero-card h3 {
-      font-size: 22px;
-      max-width: 200px;
-      line-height: 1.2;
-      margin: 6px 0;
-    }
-
-    .hero-photo {
-      position: absolute;
-      right: 12px;
-      bottom: 12px;
-      width: 105px;
-      height: 105px;
-      border-radius: 22px;
-      object-fit: cover;
-      border: 4px solid white;
-      box-shadow: 0 8px 20px rgba(45,30,75,0.15);
-    }
-
-    .benefits {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      margin-bottom: 20px;
-    }
-
-    .benefit-row {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 10px 12px;
-      background: white;
-      border: 1px solid var(--border);
-      border-radius: 16px;
-    }
-
-    .benefit-icon {
-      width: 36px;
-      height: 36px;
-      border-radius: 12px;
-      background: #fff4ee;
-      display: grid;
-      place-items: center;
-      font-size: 18px;
-    }
-
-    .btn {
-      width: 100%;
-      border: none;
-      border-radius: 18px;
-      padding: 15px;
-      font-size: 14px;
-      font-weight: 800;
-      cursor: pointer;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 8px;
-      transition: all 0.15s ease;
-      background: var(--accent-gradient);
-      color: white;
-      box-shadow: 0 8px 20px rgba(255, 101, 66, 0.24);
-    }
-
-    .btn:hover { filter: brightness(1.05); }
-    .btn:active { transform: scale(0.98); }
-    .btn.dark { background: #0f172a; box-shadow: none; }
-    .btn.outline { background: white; border: 1px solid var(--border); color: var(--ink); box-shadow: none; }
-
-    /* Form Fields */
-    .field { margin-bottom: 14px; }
-    .field label {
-      display: block;
-      font-size: 11px;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      color: #475569;
-      margin-bottom: 6px;
-    }
-
-    .input {
-      width: 100%;
-      border: 1px solid var(--border);
-      background: white;
-      border-radius: 14px;
-      padding: 12px 14px;
-      font-size: 14px;
-      font-weight: 500;
-      color: var(--ink);
-      outline: none;
-    }
-
-    .input:focus { border-color: var(--accent); }
-
-    .preset-chips {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      margin-top: 6px;
-    }
-
-    .preset-chip {
-      background: #f8f6f4;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 5px 10px;
-      font-size: 11px;
-      font-weight: 600;
-      cursor: pointer;
-      color: #475569;
-    }
-
-    .preset-chip:hover { background: #eee8e2; }
-
-    /* Grids & Cards */
-    .grid-2 {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-      margin-bottom: 14px;
-    }
-
-    .choice-card {
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 12px;
-      background: white;
-      cursor: pointer;
-      text-align: left;
-      transition: all 0.15s ease;
-    }
-
-    .choice-card.selected {
-      border-color: var(--accent);
-      background: linear-gradient(135deg, #fff2ec 0%, #f7f1ff 100%);
-      box-shadow: 0 4px 12px rgba(255, 101, 66, 0.08);
-    }
-
-    .choice-card .emoji { font-size: 22px; margin-bottom: 4px; display: block; }
-    .choice-card b { font-size: 12px; }
-
-    .checklist {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      margin-bottom: 16px;
-    }
-
-    .check-row {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 10px 12px;
-      background: white;
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      cursor: pointer;
-      font-size: 12px;
-      font-weight: 500;
-    }
-
-    .check-box {
-      width: 20px;
-      height: 20px;
-      border-radius: 6px;
-      border: 1px solid #cbd5e1;
-      display: grid;
-      place-items: center;
-      font-size: 11px;
-      font-weight: 800;
-      color: white;
-    }
-
-    .check-row.selected .check-box {
-      background: var(--accent-gradient);
-      border-color: transparent;
-    }
-
-    .focus-box {
-      background: linear-gradient(135deg, #fff0e9 0%, #fffbf8 100%);
-      border: 1px solid #ffd5c4;
-      border-radius: 20px;
-      padding: 18px;
-      margin-bottom: 14px;
-    }
-
-    .badge {
-      display: inline-block;
-      font-size: 10px;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      padding: 4px 8px;
-      border-radius: 999px;
-      background: white;
-      color: #b03a1a;
-      border: 1px solid #ffd8ca;
-      margin-bottom: 8px;
-    }
-
-    .activity-card {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 10px;
-      background: white;
-      border: 1px solid var(--border);
-      border-radius: 18px;
-      cursor: pointer;
-      margin-bottom: 8px;
-      transition: all 0.15s ease;
-    }
-
-    .activity-card:hover {
-      border-color: #ff987c;
-      transform: translateY(-1px);
-    }
-
-    .act-thumb {
-      width: 72px;
-      height: 72px;
-      border-radius: 14px;
-      object-fit: cover;
-    }
-
-    .act-info { flex: 1; min-width: 0; }
-    .act-info h5 { font-size: 14px; font-weight: 800; margin-bottom: 2px; }
-    .act-info p { font-size: 11px; color: var(--muted); }
-
-    .step-list {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      margin: 12px 0 16px;
-    }
-
-    .step-bubble {
-      display: flex;
-      gap: 10px;
-      padding: 10px;
-      border-radius: 12px;
-      background: #faf8f6;
-      border: 1px solid var(--border);
-      font-size: 12px;
-      line-height: 1.4;
-      cursor: pointer;
-    }
-
-    .step-bubble.done {
-      background: var(--emerald-soft);
-      border-color: #a7f3d0;
-      text-decoration: line-through;
-      color: #065f46;
-    }
-
-    .step-bubble-num {
-      width: 22px;
-      height: 22px;
-      border-radius: 50%;
-      background: var(--accent);
-      color: white;
-      font-weight: 800;
-      font-size: 11px;
-      display: grid;
-      place-items: center;
-      flex-shrink: 0;
-    }
-
-    /* Modal */
-    .modal-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(15, 23, 42, 0.45);
-      backdrop-filter: blur(4px);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 100;
-      padding: 16px;
-    }
-
-    .modal-overlay.open { display: flex; }
-
-    .modal-content {
-      width: 100%;
-      max-width: 380px;
-      background: white;
-      border-radius: 28px;
-      padding: 24px;
-      text-align: center;
-      box-shadow: var(--shadow);
-    }
-
-    .timer-ring {
-      width: 180px;
-      height: 180px;
-      border-radius: 50%;
-      border: 6px solid #ffeedb;
-      margin: 16px auto;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-    }
-
-    .timer-display {
-      font-size: 40px;
-      font-weight: 800;
-      color: var(--ink);
-    }
-
-    @media (max-width: 1050px) {
-      .shell { grid-template-columns: 1fr; }
-      .side, .right-side { display: none; }
-      .phone { width: 100%; max-width: 400px; height: calc(100vh - 80px); }
-    }
-  </style>
-</head>
-<body>
-
-  <header>
-    <div class="brand">
-      <div class="brand-mark">V</div>
-      <div>
-        <span class="brand-title">Viora</span>
-        <span class="brand-tag">Intuitive Parenting Flow</span>
-      </div>
-    </div>
-    <div class="top-actions">
-      <button class="pill-btn" onclick="openTimer(10)">⏱ Play Timer</button>
-      <button class="pill-btn accent" onclick="openPantryModal()">✨ Pantry Play</button>
-    </div>
-  </header>
-
-  <div class="shell">
-    <!-- Left Navigation and Context -->
-    <aside class="side">
-      <h2>Less mental load.<br/>More confident parenting.</h2>
-      <p>Moving from “I want to support my child” to “I know what to focus on next” in under 60 seconds with zero preparation fatigue.</p>
-
-      <div class="flow-steps" id="flowSteps">
-        <div class="step-item active" onclick="goToScreen(0)">
-          <div class="step-num">1</div>
-          <div class="step-text"><b>Welcome</b><span>Set purpose &amp; values</span></div>
-        </div>
-        <div class="step-item" onclick="goToScreen(1)">
-          <div class="step-num">2</div>
-          <div class="step-text"><b>Child Profile</b><span>Basic details</span></div>
-        </div>
-        <div class="step-item" onclick="goToScreen(2)">
-          <div class="step-num">3</div>
-          <div class="step-text"><b>Interests &amp; Skills</b><span>What they enjoy</span></div>
-        </div>
-        <div class="step-item" onclick="goToScreen(3)">
-          <div class="step-num">4</div>
-          <div class="step-text"><b>Priority Focus</b><span>One curated milestone</span></div>
-        </div>
-        <div class="step-item" onclick="goToScreen(4)">
-          <div class="step-num">5</div>
-          <div class="step-text"><b>5-Min Activities</b><span>Household play ideas</span></div>
-        </div>
-        <div class="step-item" onclick="goToScreen(5)">
-          <div class="step-num">6</div>
-          <div class="step-text"><b>Activity Steps</b><span>Simple walkthrough</span></div>
-        </div>
-        <div class="step-item" onclick="goToScreen(6)">
-          <div class="step-num">7</div>
-          <div class="step-text"><b>Completion</b><span>Zero guilt closure</span></div>
-        </div>
-      </div>
-    </aside>
-
-    <!-- Center Phone Simulator -->
-    <main class="phone">
-      <div class="status-bar">
-        <span>9:41</span>
-        <div class="island"></div>
-        <span>● 100%</span>
-      </div>
-
-      <!-- SCREEN 0: WELCOME -->
-      <section class="screen active" id="screen-0">
-        <div class="top-nav">
-          <span class="step-counter">WELCOME</span>
-          <button class="pill-btn" onclick="goToScreen(1)">Skip</button>
-        </div>
-        <div class="hero-card">
-          <span class="badge">Early Childhood</span>
-          <h3>Know what matters next.</h3>
-          <p style="font-size:12px; color:var(--muted); max-width:180px;">A little guidance for what matters now — and support that grows with you.</p>
-          <img class="hero-photo" src="https://cdn5.planetspark.in/media/large_u1228994638_Fair_young_Indian_child_sitting_on_a_living_room_a55a9821_c629_47ab_8a0d_3205703cc392_3_d5aebfdbeb.png" alt="Mother and Child" />
-        </div>
-        <div class="benefits">
-          <div class="benefit-row">
-            <div class="benefit-icon">🎯</div>
-            <div><b style="font-size:13px">Know the next focus</b><p style="font-size:11px;color:var(--muted)">One clear developmental priority, not 20 chores.</p></div>
-          </div>
-          <div class="benefit-row">
-            <div class="benefit-icon">💡</div>
-            <div><b style="font-size:13px">Everyday household play</b><p style="font-size:11px;color:var(--muted)">Use cups, boxes, and spoons. Zero prep fatigue.</p></div>
-          </div>
-          <div class="benefit-row">
-            <div class="benefit-icon">⏱️</div>
-            <div><b style="font-size:13px">Bite-sized connection (5–10 min)</b><p style="font-size:11px;color:var(--muted)">Put your phone down and be fully present.</p></div>
-          </div>
-        </div>
-        <div style="flex:1"></div>
-        <button class="btn" onclick="goToScreen(1)">Let's get started →</button>
-      </section>
-
-      <!-- SCREEN 1: PROFILE -->
-      <section class="screen" id="screen-1">
-        <div class="top-nav">
-          <button class="icon-btn" onclick="goToScreen(0)">←</button>
-          <span class="step-counter">Step 1 of 5</span>
-          <div style="width:34px"></div>
-        </div>
-        <div class="progress"><div class="progress-bar" style="width:20%"></div></div>
-        <h3 class="screen-title">Tell us about your child</h3>
-        <p class="screen-sub">Just the basics. You can update this anytime.</p>
-        <div class="field">
-          <label>Child's Name</label>
-          <input class="input" id="inputName" value="Vira" oninput="updateChildDisplay()" />
-        </div>
-        <div class="field">
-          <label>Age</label>
-          <input class="input" id="inputAge" value="2 years 6 months" />
-          <div class="preset-chips">
-            <span class="preset-chip" onclick="setAge('18 months')">18 mo</span>
-            <span class="preset-chip" onclick="setAge('2 years')">2 yrs</span>
-            <span class="preset-chip" onclick="setAge('2.5 years')">2.5 yrs</span>
-            <span class="preset-chip" onclick="setAge('3 years')">3 yrs</span>
-          </div>
-        </div>
-        <div class="field">
-          <label>Anything else? (optional)</label>
-          <input class="input" placeholder="e.g. loves music, very energetic..." />
-        </div>
-        <div style="flex:1"></div>
-        <button class="btn" onclick="goToScreen(2)">Next →</button>
-      </section>
-
-      <!-- SCREEN 2: INTERESTS & ABILITIES -->
-      <section class="screen" id="screen-2">
-        <div class="top-nav">
-          <button class="icon-btn" onclick="goToScreen(1)">←</button>
-          <span class="step-counter">Step 2 of 5</span>
-          <div style="width:34px"></div>
-        </div>
-        <div class="progress"><div class="progress-bar" style="width:40%"></div></div>
-        <h3 class="screen-title">What does <span class="child-name">Vira</span> enjoy?</h3>
-        <p class="screen-sub">Choose what fits best. No need to overthink it.</p>
-        <label style="font-size:11px; font-weight:800; text-transform:uppercase; color:#475569; margin-bottom:8px; display:block">Interests</label>
-        <div class="grid-2">
-          <div class="choice-card selected" onclick="toggleCard(this)"><span class="emoji">📚</span><b>Books</b></div>
-          <div class="choice-card" onclick="toggleCard(this)"><span class="emoji">🎵</span><b>Music</b></div>
-          <div class="choice-card selected" onclick="toggleCard(this)"><span class="emoji">🎨</span><b>Art &amp; crafts</b></div>
-          <div class="choice-card selected" onclick="toggleCard(this)"><span class="emoji">🌿</span><b>Outdoor play</b></div>
-        </div>
-        <label style="font-size:11px; font-weight:800; text-transform:uppercase; color:#475569; margin-bottom:8px; display:block">Things they can do</label>
-        <div class="checklist">
-          <div class="check-row selected" onclick="toggleCheck(this)"><div class="check-box">✓</div><span>Stacks blocks</span></div>
-          <div class="check-row selected" onclick="toggleCheck(this)"><div class="check-box">✓</div><span>Uses a spoon independently</span></div>
-          <div class="check-row" onclick="toggleCheck(this)"><div class="check-box"></div><span>Speaks in short sentences</span></div>
-          <div class="check-row selected" onclick="toggleCheck(this)"><div class="check-box">✓</div><span>Runs and climbs confidently</span></div>
-        </div>
-        <div style="flex:1"></div>
-        <button class="btn" onclick="goToScreen(3)">See <span class="child-name">Vira</span>'s Focus →</button>
-      </section>
-
-      <!-- SCREEN 3: FOCUS SELECTION -->
-      <section class="screen" id="screen-3">
-        <div class="top-nav">
-          <button class="icon-btn" onclick="goToScreen(2)">←</button>
-          <span class="step-counter">Step 3 of 5</span>
-          <div style="width:34px"></div>
-        </div>
-        <div class="progress"><div class="progress-bar" style="width:60%"></div></div>
-        <p style="font-size:11px; font-weight:700; color:var(--accent); margin-bottom:2px">Based on what you shared</p>
-        <h3 class="screen-title">Focus for now</h3>
-        <div class="focus-box">
-          <span class="badge">Recommended Milestone</span>
-          <h4 id="focusTitle" style="font-size:20px; font-weight:800; margin-bottom:4px">Hand–Eye Coordination</h4>
-          <p id="focusSub" style="font-size:12px; color:var(--muted); line-height:1.4">Practising simple placing, matching, and building through low-pressure everyday play.</p>
-        </div>
-        <label style="font-size:11px; font-weight:800; text-transform:uppercase; color:#475569; margin-bottom:8px; display:block">Why this focus matters</label>
-        <div class="benefits">
-          <div class="benefit-row"><span style="font-size:18px">🧠</span><p style="font-size:12px">Builds spatial coordination and focused attention without stress.</p></div>
-          <div class="benefit-row"><span style="font-size:18px">✍️</span><p style="font-size:12px">Supports self-dressing, spoon handling, and finger control.</p></div>
-          <div class="benefit-row"><span style="font-size:18px">✨</span><p style="font-size:12px">Builds naturally on what <span class="child-name">Vira</span> already loves doing.</p></div>
-        </div>
-        <div style="flex:1"></div>
-        <button class="btn" onclick="goToScreen(4)">See Activities →</button>
-      </section>
-
-      <!-- SCREEN 4: ACTIVITIES LIST -->
-      <section class="screen" id="screen-4">
-        <div class="top-nav">
-          <button class="icon-btn" onclick="goToScreen(3)">←</button>
-          <span class="step-counter">Step 4 of 5</span>
-          <div style="width:34px"></div>
-        </div>
-        <div class="progress"><div class="progress-bar" style="width:80%"></div></div>
-        <h3 class="screen-title">Pick an activity</h3>
-        <p class="screen-sub">Simple ways to practise <span class="child-name">Vira</span>'s focus.</p>
-
-        <div class="activity-card" onclick="selectActivity('Stack and build', '10 min', 'Cups or plastic bowls', 'https://blob.theelefant.ai/toy-rotation1.png', ['Place 3-4 plastic cups on the rug.', 'Show how to stack two cups: Look, one goes on top!', 'Let them try on their own without correcting minor tilts.', 'Laugh together when the tower tumbles.'])">
-          <img class="act-thumb" src="https://blob.theelefant.ai/toy-rotation1.png" alt="Blocks" />
-          <div class="act-info">
-            <h5>Stack and build</h5>
-            <p>⏱ 10 min · Zero prep · Everyday cups</p>
-          </div>
-          <span>›</span>
-        </div>
-
-        <div class="activity-card" onclick="selectActivity('Pom-pom pick up', '8 min', 'Cotton balls + bowl + spoon', 'https://www.vatsalyapreschool.in/img/classes-2.jpg', ['Scatter cotton balls across the table.', 'Give child a spoon to rescue each cotton ball into a bowl.', 'Count along softly or sort by colors.', 'Wrap up gently when interest peaks.'])">
-          <img class="act-thumb" src="https://www.vatsalyapreschool.in/img/classes-2.jpg" alt="Motor activity" />
-          <div class="act-info">
-            <h5>Pom-pom pick up</h5>
-            <p>⏱ 8 min · Pincer grasp · Cotton balls</p>
-          </div>
-          <span>›</span>
-        </div>
-
-        <div class="activity-card" onclick="selectActivity('Match the lids', '7 min', '3 food tubs with lids', 'https://cdn5.planetspark.in/media/large_u1228994638_Fair_young_Indian_child_sitting_on_a_living_room_a55a9821_c629_47ab_8a0d_3205703cc392_3_d5aebfdbeb.png', ['Mix 3 plastic containers and their matching lids.', 'Invite child: Can you help find the hat that fits this bowl?', 'Encourage rotating and twisting the lids.', 'Celebrate each satisfying click!'])">
-          <img class="act-thumb" src="https://cdn5.planetspark.in/media/large_u1228994638_Fair_young_Indian_child_sitting_on_a_living_room_a55a9821_c629_47ab_8a0d_3205703cc392_3_d5aebfdbeb.png" alt="Lids" />
-          <div class="act-info">
-            <h5>Match the lids</h5>
-            <p>⏱ 7 min · Spatial reasoning · Food tubs</p>
-          </div>
-          <span>›</span>
-        </div>
-
-        <div style="flex:1"></div>
-        <button class="btn outline" onclick="openPantryModal()">✨ Use random items in house</button>
-      </section>
-
-      <!-- SCREEN 5: ACTIVITY DETAIL -->
-      <section class="screen" id="screen-5">
-        <div class="top-nav">
-          <button class="icon-btn" onclick="goToScreen(4)">←</button>
-          <span class="step-counter">Step 5 of 5</span>
-          <div style="width:34px"></div>
-        </div>
-        <div class="progress"><div class="progress-bar" style="width:100%"></div></div>
-        <img id="detailImg" style="width:100%; height:150px; border-radius:18px; object-fit:cover; margin-bottom:12px" src="https://blob.theelefant.ai/toy-rotation1.png" alt="Activity detail" />
-        <h3 class="screen-title" id="detailTitle">Stack and build</h3>
-        <p class="screen-sub">Quick connection ritual using things around the house.</p>
-        <div style="display:flex; gap:6px; margin-bottom:12px">
-          <span class="badge" id="detailTime">⏱ 10 min</span>
-          <span class="badge" style="color:var(--muted); border-color:#e2e8f0">🏠 Living room</span>
-        </div>
-        <div style="background:#fcf9f7; border:1px solid var(--border); border-radius:14px; padding:12px; margin-bottom:12px">
-          <label style="font-size:10px; font-weight:800; text-transform:uppercase; color:#64748b">What you need</label>
-          <p id="detailNeed" style="font-size:12px; font-weight:600; margin-top:2px">Cups or plastic bowls</p>
-        </div>
-        <label style="font-size:11px; font-weight:800; text-transform:uppercase; color:#475569">Simple Steps</label>
-        <div class="step-list" id="detailSteps"></div>
-        <div style="flex:1"></div>
-        <button class="btn outline" style="margin-bottom:8px" onclick="openTimer(10)">⏱ Start 10-Min Play Timer</button>
-        <button class="btn dark" onclick="goToScreen(6)">✓ Mark as Done</button>
-      </section>
-
-      <!-- SCREEN 6: COMPLETION -->
-      <section class="screen" id="screen-6">
-        <div style="text-align:center; padding:20px 0; display:flex; flex-direction:column; align-items:center;">
-          <div style="width:72px; height:72px; border-radius:50%; background:var(--emerald-soft); color:var(--emerald); display:grid; place-items:center; font-size:36px; font-weight:bold; margin-bottom:12px">✓</div>
-          <h3 style="font-size:24px; font-weight:800; margin-bottom:4px">Nice work.</h3>
-          <p style="font-size:12px; color:var(--muted); line-height:1.5; margin-bottom:20px">You gave <span class="child-name">Vira</span> 10 minutes of pure connection today — without spending 45 minutes researching on the sofa.</p>
-          <div class="focus-box" style="text-align:left; width:100%">
-            <span class="badge">Mindset Note</span>
-            <h4 style="font-size:14px; font-weight:800; margin-bottom:4px">Consistency beats intensity</h4>
-            <p style="font-size:11px; color:var(--muted); line-height:1.4">One 5-minute daily activity builds stronger neurological safety and confidence than a marathon weekend class.</p>
-          </div>
-        </div>
-        <div style="flex:1"></div>
-        <button class="btn" onclick="goToScreen(4)">Choose another idea</button>
-        <button class="btn outline" style="margin-top:8px" onclick="goToScreen(0)">Restart Walkthrough</button>
-      </section>
-    </main>
-
-    <!-- Right Hypothesis & Metrics -->
-    <aside class="side right-side">
-      <div style="background:white; border:1px solid var(--border); border-radius:24px; padding:20px; box-shadow:0 6px 20px rgba(0,0,0,0.03)">
-        <h4 style="font-size:14px; font-weight:800; margin-bottom:6px">Prototype Hypothesis</h4>
-        <p style="font-size:12px; color:var(--muted); line-height:1.5; margin-bottom:14px">Providing 1 high-confidence priority + zero-prep play decreases parent decision fatigue.</p>
-        <div style="display:flex; justify-content:space-between; font-size:12px; padding:8px 0; border-bottom:1px solid #f1f5f9">
-          <span>Relevance</span><b style="color:var(--accent)">94%</b>
-        </div>
-        <div style="display:flex; justify-content:space-between; font-size:12px; padding:8px 0; border-bottom:1px solid #f1f5f9">
-          <span>Credibility</span><b style="color:var(--accent)">96%</b>
-        </div>
-        <div style="display:flex; justify-content:space-between; font-size:12px; padding:8px 0; border-bottom:1px solid #f1f5f9">
-          <span>Actionability</span><b style="color:var(--accent)">92%</b>
-        </div>
-        <div style="display:flex; justify-content:space-between; font-size:12px; padding:8px 0">
-          <span>Setup Speed</span><b style="color:var(--accent)">&lt; 60s</b>
-        </div>
-      </div>
-    </aside>
-  </div>
-
-  <!-- PLAY TIMER MODAL -->
-  <div class="modal-overlay" id="timerModal">
-    <div class="modal-content">
-      <span class="badge">Calm Play Timer</span>
-      <h4 style="font-size:16px; font-weight:800; margin-top:4px">Put down your phone</h4>
-      <p style="font-size:12px; color:var(--muted); margin-bottom:12px">Be present. A gentle bell rings when finished.</p>
-      <div class="timer-ring">
-        <div class="timer-display" id="timerText">10:00</div>
-        <span style="font-size:11px; color:var(--muted)" id="timerStatus">Ready</span>
-      </div>
-      <div style="display:flex; gap:8px">
-        <button class="btn" style="flex:1" id="timerBtn" onclick="toggleTimer()">Start Play</button>
-        <button class="pill-btn" onclick="closeTimer()">Close</button>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    let currentScreen = 0;
-    let timerInterval = null;
-    let secondsLeft = 600;
-    let timerRunning = false;
-
-    function goToScreen(index) {
-      currentScreen = index;
-      document.querySelectorAll('.screen').forEach((s, idx) => {
-        s.classList.toggle('active', idx === index);
-      });
-      document.querySelectorAll('.step-item').forEach((step, idx) => {
-        step.classList.toggle('active', idx === index);
-      });
-      document.querySelector('.screen.active').scrollTop = 0;
-    }
-
-    function toggleCard(el) {
-      el.classList.toggle('selected');
-    }
-
-    function toggleCheck(el) {
-      el.classList.toggle('selected');
-      const box = el.querySelector('.check-box');
-      box.textContent = el.classList.contains('selected') ? '✓' : '';
-    }
-
-    function setAge(ageStr) {
-      document.getElementById('inputAge').value = ageStr;
-    }
-
-    function updateChildDisplay() {
-      const name = document.getElementById('inputName').value.trim() || 'your child';
-      document.querySelectorAll('.child-name').forEach(el => el.textContent = name);
-    }
-
-    function selectActivity(title, time, need, imgUrl, steps) {
-      document.getElementById('detailTitle').textContent = title;
-      document.getElementById('detailTime').textContent = '⏱ ' + time;
-      document.getElementById('detailNeed').textContent = need;
-      document.getElementById('detailImg').src = imgUrl;
-
-      const stepsContainer = document.getElementById('detailSteps');
-      stepsContainer.innerHTML = steps.map((step, i) => `
-        <div class="step-bubble" onclick="this.classList.toggle('done')">
-          <div class="step-bubble-num">${i + 1}</div>
-          <div>${step}</div>
-        </div>
-      `).join('');
-
-      goToScreen(5);
-    }
-
-    /* Timer Logic */
-    function openTimer(mins) {
-      secondsLeft = mins * 60;
-      updateTimerDisplay();
-      document.getElementById('timerModal').classList.add('open');
-    }
-
-    function closeTimer() {
-      clearInterval(timerInterval);
-      timerRunning = false;
-      document.getElementById('timerBtn').textContent = 'Start Play';
-      document.getElementById('timerModal').classList.remove('open');
-    }
-
-    function toggleTimer() {
-      const btn = document.getElementById('timerBtn');
-      const status = document.getElementById('timerStatus');
-
-      if (!timerRunning) {
-        timerRunning = true;
-        btn.textContent = 'Pause';
-        status.textContent = 'Playing together...';
-        timerInterval = setInterval(() => {
-          if (secondsLeft > 0) {
-            secondsLeft--;
-            updateTimerDisplay();
-          } else {
-            clearInterval(timerInterval);
-            timerRunning = false;
-            status.textContent = 'All done!';
-            btn.textContent = 'Finished';
-          }
-        }, 1000);
-      } else {
-        clearInterval(timerInterval);
-        timerRunning = false;
-        btn.textContent = 'Resume';
-        status.textContent = 'Paused';
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
+import { Volume2, VolumeX, Smartphone, Laptop, Sparkles, Home } from 'lucide-react';
+import { ChildProfile, FocusArea, Activity, CompletedSession, ScreenId, MomContext } from './types';
+import { FOCUS_AREAS, INITIAL_ACTIVITIES } from './data/activities';
+import { sound } from './utils/audio';
+
+// Components
+import { PhoneFrame } from './components/PhoneFrame';
+import { FlowSidebarLeft, FlowSidebarRight } from './components/FlowSidebar';
+import { TimerModal } from './components/TimerModal';
+import { PantryPlayModal } from './components/PantryPlayModal';
+
+// Screens
+import { WelcomeScreen } from './components/screens/WelcomeScreen';
+import { ProfileScreen } from './components/screens/ProfileScreen';
+import { MomCheckinScreen } from './components/screens/MomCheckinScreen';
+import { InterestsScreen } from './components/screens/InterestsScreen';
+import { FocusScreen } from './components/screens/FocusScreen';
+import { ActivitiesScreen } from './components/screens/ActivitiesScreen';
+import { ActivityDetailScreen } from './components/screens/ActivityDetailScreen';
+import { CompletionScreen } from './components/screens/CompletionScreen';
+import { DashboardScreen } from './components/screens/DashboardScreen';
+
+const DEFAULT_PROFILE: ChildProfile = {
+  name: 'Vira',
+  age: '2 years 6 months',
+  ageInMonths: 30,
+  notes: 'Loves animals, very active',
+  interests: ['books', 'art', 'outdoor'],
+  abilities: ['Stacks blocks', 'Uses a spoon independently', 'Runs, climbs and moves confidently']
+};
+
+const DEFAULT_MOM_CONTEXT = {
+  energyLevel: 'low' as const,
+  situation: 'dinner_prep' as const,
+  childMood: 'calm_curious' as const
+};
+
+export default function App() {
+  const [screen, setScreen] = useState<ScreenId>('welcome');
+  const [profile, setProfile] = useState<ChildProfile>(DEFAULT_PROFILE);
+  const [momContext, setMomContext] = useState<MomContext>(DEFAULT_MOM_CONTEXT);
+  const [selectedFocus, setSelectedFocus] = useState<FocusArea>(FOCUS_AREAS[0]);
+  const [selectedActivity, setSelectedActivity] = useState<Activity>(INITIAL_ACTIVITIES[0]);
+  const [allActivities, setAllActivities] = useState<Activity[]>(INITIAL_ACTIVITIES);
+  const [favorites, setFavorites] = useState<string[]>(['act-1']);
+  const [history, setHistory] = useState<CompletedSession[]>([]);
+  const [soundOn, setSoundOn] = useState(true);
+  const [fullWidthMode, setFullWidthMode] = useState(false);
+
+  // Modals
+  const [isTimerOpen, setIsTimerOpen] = useState(false);
+  const [isPantryOpen, setIsPantryOpen] = useState(false);
+
+  // Load persistence if present
+  useEffect(() => {
+    try {
+      const savedProfile = localStorage.getItem('viora_profile');
+      if (savedProfile) {
+        setProfile(JSON.parse(savedProfile));
       }
-    }
-
-    function updateTimerDisplay() {
-      const m = Math.floor(secondsLeft / 60);
-      const s = secondsLeft % 60;
-      document.getElementById('timerText').textContent = 
-        `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
-    }
-
-    function openPantryModal() {
-      const items = prompt("What household items do you see right now? (e.g. egg carton, plastic cups, spoons):", "plastic cups and spoons");
-      if (items) {
-        selectActivity(
-          `Sensory Cup Scoop & Stack`,
-          '7 min',
-          items,
-          'https://blob.theelefant.ai/toy-rotation1.png',
-          [
-            `Place the ${items} on the rug or low table.`,
-            `Gently model placing or scooping once: "Look what happens!"`,
-            `Step back and let your child explore balance and sounds freely.`,
-            `High-five and tidy up together after 5-10 minutes.`
-          ]
-        );
+      const savedMom = localStorage.getItem('viora_mom_context');
+      if (savedMom) {
+        setMomContext(JSON.parse(savedMom));
       }
+      const savedFavs = localStorage.getItem('viora_favs');
+      if (savedFavs) {
+        setFavorites(JSON.parse(savedFavs));
+      }
+      const savedHist = localStorage.getItem('viora_history');
+      if (savedHist) {
+        setHistory(JSON.parse(savedHist));
+      }
+    } catch {
+      // Ignore storage read errors
     }
-  </script>
-</body>
-</html>
+  }, []);
+
+  // Save profile changes
+  const updateProfile = (updated: Partial<ChildProfile>) => {
+    setProfile((prev) => {
+      const next = { ...prev, ...updated };
+      try {
+        localStorage.setItem('viora_profile', JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+  };
+
+  const updateMomContext = (updated: Partial<MomContext>) => {
+    setMomContext((prev) => {
+      const next = { ...prev, ...updated };
+      try {
+        localStorage.setItem('viora_mom_context', JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+  };
+
+  const toggleFavorite = (actId: string) => {
+    setFavorites((prev) => {
+      const next = prev.includes(actId) ? prev.filter((id) => id !== actId) : [...prev, actId];
+      try {
+        localStorage.setItem('viora_favs', JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+  };
+
+  const toggleSound = () => {
+    const next = !soundOn;
+    setSoundOn(next);
+    sound.enabled = next;
+    if (next) sound.playTap();
+  };
+
+  // When completing an activity
+  const handleCompleteActivity = (act: Activity) => {
+    const newSession: CompletedSession = {
+      id: `session-${Date.now()}`,
+      activityId: act.id,
+      activityTitle: act.title,
+      focusTitle: act.focusTitle,
+      completedAt: 'Just now',
+      childName: profile.name,
+      minutesSpent: 10
+    };
+    const nextHist = [newSession, ...history];
+    setHistory(nextHist);
+    try {
+      localStorage.setItem('viora_history', JSON.stringify(nextHist));
+    } catch {}
+    setScreen('completion');
+  };
+
+  // Add custom AI generated activity
+  const handleSelectCustomActivity = (customAct: Activity) => {
+    setAllActivities((prev) => [customAct, ...prev]);
+    setSelectedActivity(customAct);
+    setScreen('detail');
+  };
+
+  // Preset switchers
+  const applyPreset = (preset: { name: string; age: string; ageInMonths: number; interests: string[]; abilities: string[] }) => {
+    setProfile({
+      ...profile,
+      ...preset
+    });
+    // Dynamically adjust recommended focus based on preset
+    if (preset.ageInMonths <= 20) {
+      setSelectedFocus(FOCUS_AREAS[0]); // motor
+    } else if (preset.interests.includes('books') && preset.abilities.includes('Speaks in short sentences')) {
+      setSelectedFocus(FOCUS_AREAS[1]); // language
+    } else {
+      setSelectedFocus(FOCUS_AREAS[0]);
+    }
+    setScreen('focus');
+  };
+
+  return (
+    <div className="min-h-screen w-full bg-[#fffaf6] text-slate-900 flex flex-col items-center justify-center relative selection:bg-orange-200 selection:text-orange-900 font-['Plus_Jakarta_Sans',sans-serif]">
+      {/* Background ambient lighting */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute -top-32 -left-32 w-96 h-96 rounded-full bg-orange-200/35 blur-3xl" />
+        <div className="absolute top-1/4 -right-32 w-96 h-96 rounded-full bg-purple-200/30 blur-3xl" />
+        <div className="absolute -bottom-32 left-1/3 w-96 h-96 rounded-full bg-emerald-100/30 blur-3xl" />
+      </div>
+
+      {/* Top Mobile / Utility Bar */}
+      <header className="w-full max-w-7xl mx-auto px-4 py-3 flex items-center justify-between z-20">
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-orange-500 via-rose-500 to-purple-600 flex items-center justify-center text-white font-extrabold text-sm shadow-xs">
+            V
+          </div>
+          <div>
+            <span className="font-extrabold text-slate-900 text-sm tracking-tight">Viora</span>
+            <span className="hidden sm:inline text-xs text-slate-400 ml-2">
+              Less mental load. More confident parenting.
+            </span>
+          </div>
+        </div>
+
+        {/* Global Controls */}
+        <div className="flex items-center gap-2">
+          {/* Quick Home button if deep in screens */}
+          {screen !== 'welcome' && (
+            <button
+              id="topbar-home-btn"
+              onClick={() => {
+                sound.playTap();
+                setScreen('dashboard');
+              }}
+              title="Go to Daily Hub"
+              className="p-2 rounded-xl bg-white/80 hover:bg-white border border-slate-200/80 text-slate-700 text-xs font-semibold flex items-center gap-1.5 shadow-2xs cursor-pointer transition-colors"
+            >
+              <Home className="w-3.5 h-3.5 text-orange-500" />
+              <span className="hidden sm:inline">Daily Hub</span>
+            </button>
+          )}
+
+          {/* AI item helper quick button */}
+          <button
+            id="topbar-pantry-btn"
+            onClick={() => {
+              sound.playTap();
+              setIsPantryOpen(true);
+            }}
+            title="Generate activity from items at home"
+            className="p-2 sm:px-3 rounded-xl bg-orange-50 hover:bg-orange-100/70 border border-orange-200/80 text-orange-800 text-xs font-bold flex items-center gap-1.5 shadow-2xs cursor-pointer transition-colors"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-orange-600" />
+            <span className="hidden sm:inline">Pantry Play</span>
+          </button>
+
+          {/* Sound Mute/Unmute */}
+          <button
+            id="topbar-sound-btn"
+            onClick={toggleSound}
+            title={soundOn ? 'Mute chimes' : 'Enable chimes'}
+            aria-label={soundOn ? 'Mute chimes' : 'Enable chimes'}
+            className="w-9 h-9 rounded-xl bg-white/80 hover:bg-white border border-slate-200/80 text-slate-600 flex items-center justify-center shadow-2xs cursor-pointer transition-colors"
+          >
+            {soundOn ? <Volume2 className="w-4 h-4 text-orange-600" /> : <VolumeX className="w-4 h-4 text-slate-400" />}
+          </button>
+
+          {/* View mode toggle */}
+          <button
+            id="topbar-viewmode-btn"
+            onClick={() => {
+              sound.playTap();
+              setFullWidthMode(!fullWidthMode);
+            }}
+            title={fullWidthMode ? 'Switch to Phone Simulator' : 'Switch to Full Screen'}
+            className="hidden md:flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/80 hover:bg-white border border-slate-200/80 text-slate-700 text-xs font-semibold shadow-2xs cursor-pointer transition-colors"
+          >
+            {fullWidthMode ? (
+              <>
+                <Smartphone className="w-3.5 h-3.5 text-orange-500" />
+                <span>Phone View</span>
+              </>
+            ) : (
+              <>
+                <Laptop className="w-3.5 h-3.5 text-purple-600" />
+                <span>Widescreen</span>
+              </>
+            )}
+          </button>
+        </div>
+      </header>
+
+      {/* Main Content Area */}
+      <main className="w-full max-w-7xl mx-auto px-4 py-2 sm:py-6 flex-1 flex items-center justify-center z-10">
+        <div className={`w-full ${fullWidthMode ? 'max-w-3xl' : 'flex items-center justify-center gap-8 xl:gap-12'}`}>
+          {/* Left Flow Guide (only in phone simulator mode on desktop) */}
+          {!fullWidthMode && (
+            <FlowSidebarLeft
+              currentScreen={screen}
+              onNavigate={(s) => setScreen(s)}
+              fullWidthMode={fullWidthMode}
+              onToggleFullWidth={() => setFullWidthMode(!fullWidthMode)}
+            />
+          )}
+
+          {/* Center Phone Simulator or Full Screen Card */}
+          <div className="flex justify-center items-center">
+            <PhoneFrame
+              fullWidthMode={fullWidthMode}
+              onHomeClick={() => setScreen('dashboard')}
+            >
+              <AnimatePresence mode="wait">
+                {screen === 'welcome' && (
+                  <motion.div
+                    key="welcome"
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -8 }}
+                    transition={{ duration: 0.2 }}
+                    className="h-full flex flex-col justify-between"
+                  >
+                    <WelcomeScreen
+                      onStart={() => setScreen('profile')}
+                      onSkip={() => setScreen('dashboard')}
+                    />
+                  </motion.div>
+                )}
+
+                {screen === 'profile' && (
+                  <motion.div
+                    key="profile"
+                    initial={{ opacity: 0, x: 12 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -12 }}
+                    transition={{ duration: 0.2 }}
+                    className="h-full flex flex-col justify-between"
+                  >
+                    <ProfileScreen
+                      profile={profile}
+                      onUpdate={updateProfile}
+                      onNext={() => setScreen('mom-checkin')}
+                      onBack={() => setScreen('welcome')}
+                    />
+                  </motion.div>
+                )}
+
+                {screen === 'mom-checkin' && (
+                  <motion.div
+                    key="mom-checkin"
+                    initial={{ opacity: 0, x: 12 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -12 }}
+                    transition={{ duration: 0.2 }}
+                    className="h-full flex flex-col justify-between"
+                  >
+                    <MomCheckinScreen
+                      momContext={momContext}
+                      childName={profile.name}
+                      onUpdate={updateMomContext}
+                      onNext={() => {
+                        // Dynamically tune recommended focus based on mom context if appropriate
+                        if (momContext.situation === 'bedtime' || momContext.childMood === 'big_feelings') {
+                          const calm = FOCUS_AREAS.find((f) => f.id === 'calm-regulation');
+                          if (calm) setSelectedFocus(calm);
+                        } else if (momContext.energyLevel === 'low') {
+                          const fine = FOCUS_AREAS.find((f) => f.id === 'fine-motor');
+                          if (fine) setSelectedFocus(fine);
+                        } else if (momContext.childMood === 'high_energy') {
+                          const gross = FOCUS_AREAS.find((f) => f.id === 'gross-motor');
+                          if (gross) setSelectedFocus(gross);
+                        }
+                        setScreen('interests');
+                      }}
+                      onBack={() => setScreen('profile')}
+                    />
+                  </motion.div>
+                )}
+
+                {screen === 'interests' && (
+                  <motion.div
+                    key="interests"
+                    initial={{ opacity: 0, x: 12 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -12 }}
+                    transition={{ duration: 0.2 }}
+                    className="h-full flex flex-col justify-between"
+                  >
+                    <InterestsScreen
+                      profile={profile}
+                      onUpdate={updateProfile}
+                      onNext={() => setScreen('focus')}
+                      onBack={() => setScreen('mom-checkin')}
+                    />
+                  </motion.div>
+                )}
+
+                {screen === 'focus' && (
+                  <motion.div
+                    key="focus"
+                    initial={{ opacity: 0, x: 12 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -12 }}
+                    transition={{ duration: 0.2 }}
+                    className="h-full flex flex-col justify-between"
+                  >
+                    <FocusScreen
+                      profile={profile}
+                      selectedFocus={selectedFocus}
+                      onSelectFocus={(f) => setSelectedFocus(f)}
+                      onNext={() => setScreen('activities')}
+                      onBack={() => setScreen('interests')}
+                    />
+                  </motion.div>
+                )}
+
+                {screen === 'activities' && (
+                  <motion.div
+                    key="activities"
+                    initial={{ opacity: 0, x: 12 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -12 }}
+                    transition={{ duration: 0.2 }}
+                    className="h-full flex flex-col justify-between"
+                  >
+                    <ActivitiesScreen
+                      profile={profile}
+                      focusTitle={selectedFocus.title}
+                      activities={allActivities.filter((a) => a.focusId === selectedFocus.id || a.id.startsWith('custom') || a.id.startsWith('gen'))}
+                      favorites={favorites}
+                      onToggleFavorite={toggleFavorite}
+                      onSelectActivity={(act) => {
+                        setSelectedActivity(act);
+                        setScreen('detail');
+                      }}
+                      onOpenPantryModal={() => setIsPantryOpen(true)}
+                      onBack={() => setScreen('focus')}
+                    />
+                  </motion.div>
+                )}
+
+                {screen === 'detail' && (
+                  <motion.div
+                    key="detail"
+                    initial={{ opacity: 0, x: 12 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -12 }}
+                    transition={{ duration: 0.2 }}
+                    className="h-full flex flex-col justify-between"
+                  >
+                    <ActivityDetailScreen
+                      activity={selectedActivity}
+                      isFavorite={favorites.includes(selectedActivity.id)}
+                      onToggleFavorite={toggleFavorite}
+                      onComplete={handleCompleteActivity}
+                      onOpenTimer={() => setIsTimerOpen(true)}
+                      onBack={() => setScreen('activities')}
+                    />
+                  </motion.div>
+                )}
+
+                {screen === 'completion' && (
+                  <motion.div
+                    key="completion"
+                    initial={{ opacity: 0, scale: 0.96 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.96 }}
+                    transition={{ duration: 0.25 }}
+                    className="h-full flex flex-col justify-between"
+                  >
+                    <CompletionScreen
+                      activity={selectedActivity}
+                      profile={profile}
+                      totalCompletedCount={history.length}
+                      onChooseAnother={() => setScreen('activities')}
+                      onGoToDashboard={() => setScreen('dashboard')}
+                      onRestart={() => setScreen('welcome')}
+                    />
+                  </motion.div>
+                )}
+
+                {screen === 'dashboard' && (
+                  <motion.div
+                    key="dashboard"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.2 }}
+                    className="h-full flex flex-col justify-between"
+                  >
+                    <DashboardScreen
+                      profile={profile}
+                      selectedFocus={selectedFocus}
+                      featuredActivity={allActivities.find((a) => a.focusId === selectedFocus.id) || allActivities[0]}
+                      favorites={allActivities.filter((a) => favorites.includes(a.id))}
+                      history={history}
+                      momContext={momContext}
+                      onStartActivity={(act) => {
+                        setSelectedActivity(act);
+                        setScreen('detail');
+                      }}
+                      onBrowseActivities={() => setScreen('activities')}
+                      onChangeFocus={() => setScreen('focus')}
+                      onOpenPantryModal={() => setIsPantryOpen(true)}
+                      onEditProfile={() => setScreen('profile')}
+                      onChangeMomContext={() => setScreen('mom-checkin')}
+                    />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </PhoneFrame>
+          </div>
+
+          {/* Right Research & Evaluation Guide (only in phone simulator mode on wide desktop) */}
+          {!fullWidthMode && (
+            <FlowSidebarRight onApplyPreset={applyPreset} />
+          )}
+        </div>
+      </main>
+
+      {/* Modals */}
+      <TimerModal
+        isOpen={isTimerOpen}
+        onClose={() => setIsTimerOpen(false)}
+        activityTitle={selectedActivity.title}
+        initialMinutes={parseInt(selectedActivity.time) || 10}
+      />
+
+      <PantryPlayModal
+        isOpen={isPantryOpen}
+        onClose={() => setIsPantryOpen(false)}
+        childName={profile.name}
+        childAge={profile.age}
+        currentFocus={selectedFocus.title}
+        onSelectActivity={handleSelectCustomActivity}
+      />
+    </div>
+  );
+}
