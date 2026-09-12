@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Viora — Interactive Prototype</title>
+<style>
+  :root{
+    --bg:#fffaf6;
+    --surface:#ffffff;
+    --surface-2:#fff3eb;
+    --ink:#17335f;
+    --muted:#66758f;
+    --accent:#ff7d55;
+    --accent-2:#f6b48c;
+    --accent-soft:#ffe6d8;
+    --green:#eaf7ea;
+    --green-ink:#3b6f4c;
+    --lav:#f0ecff;
+    --lav-ink:#5e57a5;
+    --border:#eadfd8;
+    --shadow:0 18px 40px rgba(40,54,84,.12);
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background:
+      radial-gradient(circle at top left, #fff0e7 0, transparent 30%),
+      radial-gradient(circle at bottom right, #f1ecff 0, transparent 28%),
+      var(--bg);
+    color:var(--ink);
+    min-height:100vh;
+  }
+  button,input{font:inherit}
+  .shell{
+    min-height:100vh;
+    display:grid;
+    grid-template-columns: 1fr 390px 1fr;
+    gap:24px;
+    align-items:center;
+    padding:28px;
+  }
+  .side{
+    align-self:stretch;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    max-width:360px;
+  }
+  .brand{
+    display:flex;
+    gap:10px;
+    align-items:center;
+    margin-bottom:18px;
+  }
+  .mark{
+    width:44px;height:44px;border-radius:15px;
+    background:linear-gradient(145deg,#ff9d76,#ffd2ba);
+    position:relative;
+    box-shadow:0 10px 24px rgba(255,125,85,.18);
+  }
+  .mark:before,.mark:after{
+    content:"";position:absolute;background:white;border-radius:999px;
+    width:12px;height:24px;top:10px;
+  }
+  .mark:before{left:9px;transform:rotate(-28deg)}
+  .mark:after{right:9px;transform:rotate(28deg)}
+  .brand h1{font-size:32px;margin:0;letter-spacing:-1.2px}
+  .tag{font-size:13px;color:var(--muted)}
+  .side h2{font-size:34px;line-height:1.05;margin:10px 0 12px;letter-spacing:-1.4px}
+  .side p{color:var(--muted);line-height:1.6}
+  .flow{
+    margin-top:26px;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+  }
+  .flow-step{
+    display:flex;gap:12px;align-items:flex-start;
+    color:var(--muted);font-size:14px;
+  }
+  .flow-step b{color:var(--ink)}
+  .dot{
+    width:28px;height:28px;border-radius:50%;
+    background:#fff;border:1px solid var(--border);
+    display:grid;place-items:center;flex:0 0 auto;font-size:12px;font-weight:700;
+  }
+  .flow-step.active .dot{background:var(--accent);border-color:var(--accent);color:white}
+  .flow-step.active{color:var(--ink)}
+  .phone{
+    width:390px;
+    height:820px;
+    background:var(--surface);
+    border:1px solid rgba(30,48,80,.12);
+    border-radius:42px;
+    box-shadow:var(--shadow);
+    overflow:hidden;
+    position:relative;
+  }
+  .status{
+    height:34px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 22px;
+    font-size:12px;
+    font-weight:700;
+    background:#fff;
+  }
+  .screen{
+    height:calc(100% - 34px);
+    display:none;
+    flex-direction:column;
+    padding:18px 20px 22px;
+    overflow:auto;
+    background:#fff;
+  }
+  .screen.active{display:flex}
+  .topbar{
+    display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;
+  }
+  .iconbtn{
+    width:36px;height:36px;border-radius:50%;border:none;background:#f8f4f1;color:var(--ink);cursor:pointer;
+  }
+  .progress{
+    height:5px;background:#f0ebe8;border-radius:999px;overflow:hidden;margin:0 0 18px;
+  }
+  .progress > div{height:100%;background:var(--accent);border-radius:999px}
+  h3{font-size:26px;line-height:1.12;margin:8px 0 8px;letter-spacing:-.8px}
+  .sub{color:var(--muted);font-size:14px;line-height:1.5;margin-bottom:18px}
+  .hero{
+    min-height:260px;
+    border-radius:28px;
+    padding:24px;
+    background:linear-gradient(145deg,#fff0e7,#ffe2d0);
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+    overflow:hidden;
+    position:relative;
+  }
+  .hero:after{
+    content:"";
+    position:absolute;
+    width:190px;height:190px;border-radius:50%;
+    right:-50px;bottom:-60px;
+    background:rgba(255,255,255,.45);
+  }
+  .hero .emoji{font-size:84px;z-index:1}
+  .hero h3{max-width:260px;z-index:1}
+  .benefits{display:grid;gap:12px;margin:18px 0}
+  .benefit{display:flex;gap:10px;align-items:center;color:var(--ink);font-size:14px}
+  .benefit span:first-child{
+    width:32px;height:32px;border-radius:12px;display:grid;place-items:center;background:var(--surface-2)
+  }
+  .btn{
+    width:100%;border:none;border-radius:18px;padding:15px 18px;
+    background:linear-gradient(135deg,var(--accent),#ff9a77);
+    color:white;font-weight:800;cursor:pointer;
+    box-shadow:0 8px 18px rgba(255,125,85,.22);
+  }
+  .btn.secondary{
+    background:#f5f2f0;color:var(--ink);box-shadow:none;
+  }
+  .btn.ghost{
+    background:transparent;color:var(--ink);box-shadow:none;border:1px solid var(--border);
+  }
+  .btn.dark{
+    background:var(--ink);box-shadow:none;
+  }
+  .spacer{flex:1}
+  .field{margin-bottom:14px}
+  label{display:block;font-size:13px;font-weight:700;margin-bottom:7px}
+  input{
+    width:100%;border:1px solid var(--border);border-radius:14px;padding:13px 14px;color:var(--ink);outline:none;background:white;
+  }
+  input:focus{border-color:var(--accent)}
+  .choice-row{display:flex;gap:8px;flex-wrap:wrap}
+  .chip{
+    border:1px solid var(--border);background:#fff;border-radius:14px;padding:10px 12px;cursor:pointer;color:var(--ink);
+    font-size:13px;
+  }
+  .chip.selected{border-color:var(--accent);background:var(--accent-soft);color:#a64529;font-weight:700}
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:18px}
+  .tile{
+    border:1px solid var(--border);background:#fff;border-radius:18px;padding:14px;cursor:pointer;min-height:92px;
+    display:flex;flex-direction:column;gap:6px;justify-content:center;
+  }
+  .tile.selected{border-color:var(--accent);background:var(--accent-soft)}
+  .tile .big{font-size:24px}
+  .check{
+    display:flex;gap:10px;align-items:flex-start;padding:11px 0;border-bottom:1px solid #f3eeeb;cursor:pointer;
+  }
+  .box{
+    width:22px;height:22px;border-radius:7px;border:1px solid #d8cec7;display:grid;place-items:center;flex:0 0 auto;margin-top:1px;
+  }
+  .check.selected .box{background:var(--accent);border-color:var(--accent);color:white}
+  .focus-card{
+    background:linear-gradient(145deg,#fff0ed,#fff8f5);
+    border:1px solid #ffe0d4;border-radius:24px;padding:20px;margin:8px 0 16px;
+  }
+  .pill{
+    display:inline-flex;align-items:center;gap:6px;
+    font-size:11px;font-weight:800;text-transform:uppercase;
+    padding:7px 10px;border-radius:999px;background:#fff0e2;color:#b34d2d;
+  }
+  .focus-card h4{font-size:25px;margin:12px 0 8px}
+  .why{display:grid;gap:10px;margin:14px 0}
+  .why-item{
+    display:flex;gap:10px;align-items:flex-start;padding:12px;border-radius:16px;background:#faf8f7;font-size:13px;line-height:1.4;
+  }
+  .activities{display:grid;gap:12px}
+  .activity{
+    border:1px solid var(--border);border-radius:18px;padding:12px;display:grid;grid-template-columns:74px 1fr 20px;gap:12px;align-items:center;cursor:pointer;
+  }
+  .thumb{
+    width:74px;height:74px;border-radius:16px;display:grid;place-items:center;font-size:34px;background:linear-gradient(145deg,#fff1e9,#f3efff)
+  }
+  .activity h5{margin:0 0 5px;font-size:15px}
+  .meta{font-size:12px;color:var(--muted);line-height:1.5}
+  .detail-hero{
+    border-radius:24px;min-height:220px;display:grid;place-items:center;font-size:96px;background:linear-gradient(145deg,#fff0e8,#f2ecff);margin-bottom:14px
+  }
+  .detail-card{padding:14px;border-radius:16px;background:#faf8f6;margin:10px 0}
+  .steps{counter-reset:step;display:grid;gap:10px;margin:10px 0}
+  .steps div{display:flex;gap:10px;align-items:flex-start;font-size:13px;line-height:1.45}
+  .steps div:before{
+    counter-increment:step;content:counter(step);
+    width:24px;height:24px;display:grid;place-items:center;border-radius:50%;background:var(--accent);color:white;font-size:11px;font-weight:800;flex:0 0 auto;
+  }
+  .success{
+    display:grid;place-items:center;text-align:center;height:100%;
+  }
+  .success-badge{
+    width:110px;height:110px;border-radius:50%;display:grid;place-items:center;background:var(--green);font-size:54px;margin-bottom:18px;
+  }
+  .success h3{font-size:30px}
+  .right-card{
+    background:rgba(255,255,255,.7);
+    backdrop-filter:blur(10px);
+    border:1px solid rgba(255,255,255,.9);
+    border-radius:24px;
+    padding:20px;
+    box-shadow:0 10px 30px rgba(35,53,85,.08);
+  }
+  .right-card h4{margin:0 0 8px;font-size:16px}
+  .right-card p{font-size:13px;margin:0 0 14px;color:var(--muted)}
+  .metric{
+    display:flex;justify-content:space-between;font-size:13px;padding:9px 0;border-bottom:1px solid #efe8e3;
+  }
+  .metric:last-child{border-bottom:none}
+  .prototype-note{
+    margin-top:14px;font-size:12px;color:var(--muted);line-height:1.5;
+  }
+  @media(max-width:1050px){
+    .shell{grid-template-columns:1fr;justify-items:center;padding:16px}
+    .side,.right{display:none}
+    .phone{width:min(390px,100%);height:calc(100vh - 32px)}
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+  <aside class="side">
+    <div class="brand">
+      <div class="mark"></div>
+      <div><h1>Viora</h1><div class="tag">Small steps. Brighter tomorrows.</div></div>
+    </div>
+    <h2>Less research.<br/>More clarity.<br/>More meaningful moments.</h2>
+    <p>This prototype tests the core value proposition: can we help a working mother move from “I want to support my child” to “I know what to focus on next” with less mental effort?</p>
+    <div class="flow" id="flowList"></div>
+  </aside>
+
+  <main class="phone">
+    <div class="status"><span>9:41</span><span>● ●● 100%</span></div>
+
+    <section class="screen active" data-screen="0">
+      <div class="topbar"><span></span><button class="iconbtn" onclick="goTo(1)">Skip</button></div>
+      <div class="hero">
+        <div>
+          <div class="pill">Personalized developmental guidance</div>
+          <h3>Know what to focus on next for your little one.</h3>
+          <p class="sub" style="margin-bottom:0">A simple way to turn developmental guidance into practical everyday moments.</p>
+        </div>
+        <div class="emoji">👩‍👧</div>
+      </div>
+      <div class="benefits">
+        <div class="benefit"><span>🎯</span><span>Know what matters now</span></div>
+        <div class="benefit"><span>💡</span><span>Get a few practical activities</span></div>
+        <div class="benefit"><span>⏱️</span><span>Fit it into real life</span></div>
+      </div>
+      <div class="spacer"></div>
+      <button class="btn" onclick="goTo(1)">Let's get started →</button>
+    </section>
+
+    <section class="screen" data-screen="1">
+      <div class="topbar"><button class="iconbtn" onclick="prev()">←</button><span>1 of 5</span><span></span></div>
+      <div class="progress"><div style="width:20%"></div></div>
+      <h3>Tell us a little about your child</h3>
+      <div class="sub">Just enough to make the guidance useful. No detailed tracking.</div>
+      <div class="field"><label>Child's name</label><input id="childName" value="Aarohi" /></div>
+      <div class="field"><label>Age</label><input id="childAge" value="2 years 6 months" /></div>
+      <div class="field"><label>Anything important to know? <span style="font-weight:400;color:var(--muted)">(optional)</span></label><input id="extra" placeholder="e.g. loves animals, very active..." /></div>
+      <div class="spacer"></div>
+      <button class="btn" onclick="goTo(2)">Next →</button>
+    </section>
+
+    <section class="screen" data-screen="2">
+      <div class="topbar"><button class="iconbtn" onclick="prev()">←</button><span>2 of 5</span><span></span></div>
+      <div class="progress"><div style="width:40%"></div></div>
+      <h3>What is your child into right now?</h3>
+      <div class="sub">Pick a few interests and things they are already comfortable doing.</div>
+      <label>Interests</label>
+      <div class="grid">
+        <button class="tile selected" onclick="toggleTile(this)"><span class="big">📚</span><b>Books</b></button>
+        <button class="tile" onclick="toggleTile(this)"><span class="big">🎵</span><b>Music</b></button>
+        <button class="tile selected" onclick="toggleTile(this)"><span class="big">🎨</span><b>Art & crafts</b></button>
+        <button class="tile selected" onclick="toggleTile(this)"><span class="big">🌿</span><b>Outdoor play</b></button>
+      </div>
+      <label>Already comfortable with</label>
+      <div class="check selected" onclick="toggleCheck(this)"><span class="box">✓</span><span>Stacks blocks</span></div>
+      <div class="check selected" onclick="toggleCheck(this)"><span class="box">✓</span><span>Uses a spoon independently</span></div>
+      <div class="check" onclick="toggleCheck(this)"><span class="box"></span><span>Speaks in short sentences</span></div>
+      <div class="check selected" onclick="toggleCheck(this)"><span class="box">✓</span><span>Runs, climbs and moves confidently</span></div>
+      <div class="spacer"></div>
+      <button class="btn" onclick="goTo(3)">Show me what matters now →</button>
+    </section>
+
+    <section class="screen" data-screen="3">
+      <div class="topbar"><button class="iconbtn" onclick="prev()">←</button><span>3 of 5</span><span></span></div>
+      <div class="progress"><div style="width:60%"></div></div>
+      <div class="sub" style="margin-bottom:8px">Based on <span class="child-display">Aarohi</span>'s age, interests and current abilities</div>
+      <h3>Your focus now</h3>
+      <div class="focus-card">
+        <div class="pill">Recommended</div>
+        <h4>Hand–eye coordination</h4>
+        <p class="sub" style="margin:0">A useful next step is practising activities that involve placing, matching and controlling objects more precisely.</p>
+      </div>
+      <label>Why this matters</label>
+      <div class="why">
+        <div class="why-item"><span>🧠</span><span>Builds precision, focus and problem-solving through everyday play.</span></div>
+        <div class="why-item"><span>✍️</span><span>Supports later skills such as drawing, dressing and early writing.</span></div>
+        <div class="why-item"><span>✨</span><span>Fits well with the abilities you told us your child already has.</span></div>
+      </div>
+      <div class="spacer"></div>
+      <button class="btn" onclick="goTo(4)">Show me activities →</button>
+      <button class="btn ghost" style="margin-top:8px" onclick="alert('Prototype note: alternate focus areas would be explored in a later iteration.')">Explore another focus</button>
+    </section>
+
+    <section class="screen" data-screen="4">
+      <div class="topbar"><button class="iconbtn" onclick="prev()">←</button><span>4 of 5</span><span></span></div>
+      <div class="progress"><div style="width:80%"></div></div>
+      <h3>Simple activities for everyday moments</h3>
+      <div class="sub">A few practical ways to build <span class="child-display">Aarohi</span>'s hand–eye coordination.</div>
+      <div class="activities">
+        <div class="activity" onclick="openActivity('Stack and build','🧱','10 min','Stacking cups or household containers','Show your child how to stack two cups.|Let them try on their own.|Encourage them to make a taller tower.|Try building side by side.')">
+          <div class="thumb">🧱</div><div><h5>Stack and build</h5><div class="meta">10 min · At home<br/>Uses everyday items</div></div><b>›</b>
+        </div>
+        <div class="activity" onclick="openActivity('Pom-pom pick up','🟠','10 min','Pom-poms or cotton balls + a bowl','Place the items in front of your child.|Ask them to pick up one item at a time.|Move each item into the bowl.|Try sorting by size or color.')">
+          <div class="thumb">🟠</div><div><h5>Pom-pom pick up</h5><div class="meta">10 min · Simple setup<br/>Builds control</div></div><b>›</b>
+        </div>
+        <div class="activity" onclick="openActivity('Match the lids','🥣','10 min','2–4 containers with matching lids','Place the containers and lids separately.|Invite your child to find a matching lid.|Let them try putting it on.|Celebrate the match and repeat.')">
+          <div class="thumb">🥣</div><div><h5>Match the lids</h5><div class="meta">10 min · Kitchen items<br/>Builds matching skills</div></div><b>›</b>
+        </div>
+      </div>
+      <div class="spacer"></div>
+      <button class="btn secondary" onclick="alert('Prototype note: this would refresh activities based on progress and interests.')">Give me different ideas</button>
+    </section>
+
+    <section class="screen" data-screen="5">
+      <div class="topbar"><button class="iconbtn" onclick="goTo(4)">←</button><span>5 of 5</span><span>♡</span></div>
+      <div class="progress"><div style="width:100%"></div></div>
+      <div class="detail-hero" id="detailEmoji">🧱</div>
+      <h3 id="detailTitle">Stack and build</h3>
+      <div class="sub">A simple activity to practise control, coordination and focused play.</div>
+      <div class="choice-row" style="margin-bottom:8px">
+        <span class="chip selected">⏱ <span id="detailTime">10 min</span></span>
+        <span class="chip">🏠 At home</span>
+        <span class="chip">👶 Ages 2–3</span>
+      </div>
+      <div class="detail-card">
+        <label>What you need</label>
+        <div id="detailNeed" style="font-size:13px;color:var(--muted)">Stacking cups or household containers</div>
+      </div>
+      <label style="margin-top:8px">How to do it</label>
+      <div class="steps" id="detailSteps"></div>
+      <div class="spacer"></div>
+      <button class="btn dark" onclick="goTo(6)">✓ Mark as done</button>
+    </section>
+
+    <section class="screen" data-screen="6">
+      <div class="success">
+        <div>
+          <div class="success-badge">✓</div>
+          <h3>Nice work.</h3>
+          <p class="sub">You supported <span class="child-display">Aarohi</span>'s hand–eye coordination today — without having to research what to do first.</p>
+          <div class="focus-card" style="text-align:left">
+            <div class="pill">Keep it lightweight</div>
+            <h4 style="font-size:20px">What happens next?</h4>
+            <p class="sub" style="margin-bottom:0">Try this focus a few times. When you're ready, Viora can suggest whether to continue, adapt or move to a new focus.</p>
+          </div>
+          <button class="btn" onclick="goTo(4)">Try another activity</button>
+          <button class="btn ghost" style="margin-top:10px" onclick="goTo(0)">Restart prototype</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <aside class="side right">
+    <div class="right-card">
+      <h4>Prototype hypothesis</h4>
+      <p>If mothers receive a small number of relevant developmental priorities plus practical activities, they will spend less effort researching and deciding what to do next.</p>
+      <div class="metric"><span>Relevance</span><b>Does the focus fit?</b></div>
+      <div class="metric"><span>Trust</span><b>Is the “why” credible?</b></div>
+      <div class="metric"><span>Actionability</span><b>Would she try it?</b></div>
+      <div class="metric"><span>Effort</span><b>Does this feel easier?</b></div>
+      <div class="metric"><span>Input burden</span><b>Is setup light enough?</b></div>
+      <div class="metric"><span>Repeat value</span><b>Would she return?</b></div>
+    </div>
+    <div class="prototype-note">Tip: click through the center phone. Inputs and selections are interactive, and the chosen child name carries into later screens.</div>
+  </aside>
+</div>
+
+<script>
+const flowNames = [
+  "Welcome",
+  "Child profile",
+  "Interests & abilities",
+  "Next-best focus",
+  "Activities",
+  "Activity detail",
+  "Completion"
+];
+let current = 0;
+
+function renderFlow(){
+  const list = document.getElementById('flowList');
+  list.innerHTML = flowNames.map((name,i)=>`
+    <div class="flow-step ${i===current?'active':''}">
+      <div class="dot">${i+1}</div>
+      <div><b>${name}</b><br>${[
+        'Set context and value',
+        'Capture only essential details',
+        'Understand the child a little better',
+        'Narrow the decision',
+        'Turn guidance into action',
+        'Make execution easy',
+        'Close the loop without heavy tracking'
+      ][i]}</div>
+    </div>`).join('');
+}
+
+function goTo(n){
+  current = n;
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelector(`[data-screen="${n}"]`).classList.add('active');
+  updateChildName();
+  renderFlow();
+  document.querySelector('.screen.active').scrollTop = 0;
+}
+
+function prev(){ goTo(Math.max(0,current-1)); }
+
+function toggleTile(el){ el.classList.toggle('selected'); }
+function toggleCheck(el){
+  el.classList.toggle('selected');
+  el.querySelector('.box').textContent = el.classList.contains('selected') ? '✓' : '';
+}
+
+function updateChildName(){
+  const input = document.getElementById('childName');
+  const name = input && input.value.trim() ? input.value.trim() : 'your child';
+  document.querySelectorAll('.child-display').forEach(el=>el.textContent=name);
+}
+
+function openActivity(title,emoji,time,need,steps){
+  document.getElementById('detailTitle').textContent = title;
+  document.getElementById('detailEmoji').textContent = emoji;
+  document.getElementById('detailTime').textContent = time;
+  document.getElementById('detailNeed').textContent = need;
+  document.getElementById('detailSteps').innerHTML = steps.split('|').map(s=>`<div>${s}</div>`).join('');
+  goTo(5);
+}
+
+document.getElementById('childName').addEventListener('input', updateChildName);
+renderFlow();
+</script>
+</body>
+</html>
