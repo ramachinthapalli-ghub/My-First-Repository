@@ -1,490 +1,1043 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Viora — Interactive Prototype</title>
-<style>
-  :root{
-    --bg:#fffaf6;
-    --surface:#ffffff;
-    --surface-2:#fff3eb;
-    --ink:#17335f;
-    --muted:#66758f;
-    --accent:#ff7d55;
-    --accent-2:#f6b48c;
-    --accent-soft:#ffe6d8;
-    --green:#eaf7ea;
-    --green-ink:#3b6f4c;
-    --lav:#f0ecff;
-    --lav-ink:#5e57a5;
-    --border:#eadfd8;
-    --shadow:0 18px 40px rgba(40,54,84,.12);
-  }
-  *{box-sizing:border-box}
-  body{
-    margin:0;
-    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    background:
-      radial-gradient(circle at top left, #fff0e7 0, transparent 30%),
-      radial-gradient(circle at bottom right, #f1ecff 0, transparent 28%),
-      var(--bg);
-    color:var(--ink);
-    min-height:100vh;
-  }
-  button,input{font:inherit}
-  .shell{
-    min-height:100vh;
-    display:grid;
-    grid-template-columns: 1fr 390px 1fr;
-    gap:24px;
-    align-items:center;
-    padding:28px;
-  }
-  .side{
-    align-self:stretch;
-    display:flex;
-    flex-direction:column;
-    justify-content:center;
-    max-width:360px;
-  }
-  .brand{
-    display:flex;
-    gap:10px;
-    align-items:center;
-    margin-bottom:18px;
-  }
-  .mark{
-    width:44px;height:44px;border-radius:15px;
-    background:linear-gradient(145deg,#ff9d76,#ffd2ba);
-    position:relative;
-    box-shadow:0 10px 24px rgba(255,125,85,.18);
-  }
-  .mark:before,.mark:after{
-    content:"";position:absolute;background:white;border-radius:999px;
-    width:12px;height:24px;top:10px;
-  }
-  .mark:before{left:9px;transform:rotate(-28deg)}
-  .mark:after{right:9px;transform:rotate(28deg)}
-  .brand h1{font-size:32px;margin:0;letter-spacing:-1.2px}
-  .tag{font-size:13px;color:var(--muted)}
-  .side h2{font-size:34px;line-height:1.05;margin:10px 0 12px;letter-spacing:-1.4px}
-  .side p{color:var(--muted);line-height:1.6}
-  .flow{
-    margin-top:26px;
-    display:flex;
-    flex-direction:column;
-    gap:12px;
-  }
-  .flow-step{
-    display:flex;gap:12px;align-items:flex-start;
-    color:var(--muted);font-size:14px;
-  }
-  .flow-step b{color:var(--ink)}
-  .dot{
-    width:28px;height:28px;border-radius:50%;
-    background:#fff;border:1px solid var(--border);
-    display:grid;place-items:center;flex:0 0 auto;font-size:12px;font-weight:700;
-  }
-  .flow-step.active .dot{background:var(--accent);border-color:var(--accent);color:white}
-  .flow-step.active{color:var(--ink)}
-  .phone{
-    width:390px;
-    height:820px;
-    background:var(--surface);
-    border:1px solid rgba(30,48,80,.12);
-    border-radius:42px;
-    box-shadow:var(--shadow);
-    overflow:hidden;
-    position:relative;
-  }
-  .status{
-    height:34px;
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    padding:0 22px;
-    font-size:12px;
-    font-weight:700;
-    background:#fff;
-  }
-  .screen{
-    height:calc(100% - 34px);
-    display:none;
-    flex-direction:column;
-    padding:18px 20px 22px;
-    overflow:auto;
-    background:#fff;
-  }
-  .screen.active{display:flex}
-  .topbar{
-    display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;
-  }
-  .iconbtn{
-    width:36px;height:36px;border-radius:50%;border:none;background:#f8f4f1;color:var(--ink);cursor:pointer;
-  }
-  .progress{
-    height:5px;background:#f0ebe8;border-radius:999px;overflow:hidden;margin:0 0 18px;
-  }
-  .progress > div{height:100%;background:var(--accent);border-radius:999px}
-  h3{font-size:26px;line-height:1.12;margin:8px 0 8px;letter-spacing:-.8px}
-  .sub{color:var(--muted);font-size:14px;line-height:1.5;margin-bottom:18px}
-  .hero{
-    min-height:260px;
-    border-radius:28px;
-    padding:24px;
-    background:linear-gradient(145deg,#fff0e7,#ffe2d0);
-    display:flex;
-    flex-direction:column;
-    justify-content:space-between;
-    overflow:hidden;
-    position:relative;
-  }
-  .hero:after{
-    content:"";
-    position:absolute;
-    width:190px;height:190px;border-radius:50%;
-    right:-50px;bottom:-60px;
-    background:rgba(255,255,255,.45);
-  }
-  .hero .emoji{font-size:84px;z-index:1}
-  .hero h3{max-width:260px;z-index:1}
-  .benefits{display:grid;gap:12px;margin:18px 0}
-  .benefit{display:flex;gap:10px;align-items:center;color:var(--ink);font-size:14px}
-  .benefit span:first-child{
-    width:32px;height:32px;border-radius:12px;display:grid;place-items:center;background:var(--surface-2)
-  }
-  .btn{
-    width:100%;border:none;border-radius:18px;padding:15px 18px;
-    background:linear-gradient(135deg,var(--accent),#ff9a77);
-    color:white;font-weight:800;cursor:pointer;
-    box-shadow:0 8px 18px rgba(255,125,85,.22);
-  }
-  .btn.secondary{
-    background:#f5f2f0;color:var(--ink);box-shadow:none;
-  }
-  .btn.ghost{
-    background:transparent;color:var(--ink);box-shadow:none;border:1px solid var(--border);
-  }
-  .btn.dark{
-    background:var(--ink);box-shadow:none;
-  }
-  .spacer{flex:1}
-  .field{margin-bottom:14px}
-  label{display:block;font-size:13px;font-weight:700;margin-bottom:7px}
-  input{
-    width:100%;border:1px solid var(--border);border-radius:14px;padding:13px 14px;color:var(--ink);outline:none;background:white;
-  }
-  input:focus{border-color:var(--accent)}
-  .choice-row{display:flex;gap:8px;flex-wrap:wrap}
-  .chip{
-    border:1px solid var(--border);background:#fff;border-radius:14px;padding:10px 12px;cursor:pointer;color:var(--ink);
-    font-size:13px;
-  }
-  .chip.selected{border-color:var(--accent);background:var(--accent-soft);color:#a64529;font-weight:700}
-  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:18px}
-  .tile{
-    border:1px solid var(--border);background:#fff;border-radius:18px;padding:14px;cursor:pointer;min-height:92px;
-    display:flex;flex-direction:column;gap:6px;justify-content:center;
-  }
-  .tile.selected{border-color:var(--accent);background:var(--accent-soft)}
-  .tile .big{font-size:24px}
-  .check{
-    display:flex;gap:10px;align-items:flex-start;padding:11px 0;border-bottom:1px solid #f3eeeb;cursor:pointer;
-  }
-  .box{
-    width:22px;height:22px;border-radius:7px;border:1px solid #d8cec7;display:grid;place-items:center;flex:0 0 auto;margin-top:1px;
-  }
-  .check.selected .box{background:var(--accent);border-color:var(--accent);color:white}
-  .focus-card{
-    background:linear-gradient(145deg,#fff0ed,#fff8f5);
-    border:1px solid #ffe0d4;border-radius:24px;padding:20px;margin:8px 0 16px;
-  }
-  .pill{
-    display:inline-flex;align-items:center;gap:6px;
-    font-size:11px;font-weight:800;text-transform:uppercase;
-    padding:7px 10px;border-radius:999px;background:#fff0e2;color:#b34d2d;
-  }
-  .focus-card h4{font-size:25px;margin:12px 0 8px}
-  .why{display:grid;gap:10px;margin:14px 0}
-  .why-item{
-    display:flex;gap:10px;align-items:flex-start;padding:12px;border-radius:16px;background:#faf8f7;font-size:13px;line-height:1.4;
-  }
-  .activities{display:grid;gap:12px}
-  .activity{
-    border:1px solid var(--border);border-radius:18px;padding:12px;display:grid;grid-template-columns:74px 1fr 20px;gap:12px;align-items:center;cursor:pointer;
-  }
-  .thumb{
-    width:74px;height:74px;border-radius:16px;display:grid;place-items:center;font-size:34px;background:linear-gradient(145deg,#fff1e9,#f3efff)
-  }
-  .activity h5{margin:0 0 5px;font-size:15px}
-  .meta{font-size:12px;color:var(--muted);line-height:1.5}
-  .detail-hero{
-    border-radius:24px;min-height:220px;display:grid;place-items:center;font-size:96px;background:linear-gradient(145deg,#fff0e8,#f2ecff);margin-bottom:14px
-  }
-  .detail-card{padding:14px;border-radius:16px;background:#faf8f6;margin:10px 0}
-  .steps{counter-reset:step;display:grid;gap:10px;margin:10px 0}
-  .steps div{display:flex;gap:10px;align-items:flex-start;font-size:13px;line-height:1.45}
-  .steps div:before{
-    counter-increment:step;content:counter(step);
-    width:24px;height:24px;display:grid;place-items:center;border-radius:50%;background:var(--accent);color:white;font-size:11px;font-weight:800;flex:0 0 auto;
-  }
-  .success{
-    display:grid;place-items:center;text-align:center;height:100%;
-  }
-  .success-badge{
-    width:110px;height:110px;border-radius:50%;display:grid;place-items:center;background:var(--green);font-size:54px;margin-bottom:18px;
-  }
-  .success h3{font-size:30px}
-  .right-card{
-    background:rgba(255,255,255,.7);
-    backdrop-filter:blur(10px);
-    border:1px solid rgba(255,255,255,.9);
-    border-radius:24px;
-    padding:20px;
-    box-shadow:0 10px 30px rgba(35,53,85,.08);
-  }
-  .right-card h4{margin:0 0 8px;font-size:16px}
-  .right-card p{font-size:13px;margin:0 0 14px;color:var(--muted)}
-  .metric{
-    display:flex;justify-content:space-between;font-size:13px;padding:9px 0;border-bottom:1px solid #efe8e3;
-  }
-  .metric:last-child{border-bottom:none}
-  .prototype-note{
-    margin-top:14px;font-size:12px;color:var(--muted);line-height:1.5;
-  }
-  @media(max-width:1050px){
-    .shell{grid-template-columns:1fr;justify-items:center;padding:16px}
-    .side,.right{display:none}
-    .phone{width:min(390px,100%);height:calc(100vh - 32px)}
-  }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Viora — Intuitive Parenting Companion</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #fffaf6;
+      --surface: #ffffff;
+      --surface-subtle: #fff4ed;
+      --ink: #111827;
+      --muted: #64748b;
+      --border: #f1e6de;
+      --accent: #ff6542;
+      --accent-hover: #e55332;
+      --accent-gradient: linear-gradient(135deg, #ff6542 0%, #ff8c53 50%, #8b5cf6 100%);
+      --accent-soft: #fff1eb;
+      --emerald: #10b981;
+      --emerald-soft: #ecfdf5;
+      --shadow: 0 20px 50px rgba(45, 30, 75, 0.12);
+      --radius: 20px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      background:
+        radial-gradient(circle at 10% 10%, rgba(255, 101, 66, 0.15), transparent 30%),
+        radial-gradient(circle at 90% 20%, rgba(139, 92, 246, 0.12), transparent 28%),
+        radial-gradient(circle at 50% 90%, rgba(16, 185, 129, 0.08), transparent 30%),
+        var(--bg);
+      color: var(--ink);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      width: 100%;
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 14px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-mark {
+      width: 36px;
+      height: 36px;
+      border-radius: 12px;
+      background: var(--accent-gradient);
+      color: white;
+      font-weight: 800;
+      display: grid;
+      place-items: center;
+      box-shadow: 0 4px 12px rgba(255, 101, 66, 0.25);
+    }
+
+    .brand-title {
+      font-weight: 800;
+      font-size: 18px;
+      letter-spacing: -0.5px;
+    }
+
+    .brand-tag {
+      font-size: 12px;
+      color: var(--muted);
+      margin-left: 8px;
+    }
+
+    .top-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .pill-btn {
+      border: 1px solid var(--border);
+      background: white;
+      padding: 8px 14px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--ink);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+    }
+
+    .pill-btn:hover { background: #faf8f6; }
+    .pill-btn.accent {
+      background: var(--accent-soft);
+      border-color: #ffd8ca;
+      color: #b03a1a;
+    }
+
+    .shell {
+      flex: 1;
+      width: 100%;
+      max-width: 1280px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 320px 410px 300px;
+      gap: 32px;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .side {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .side h2 {
+      font-size: 28px;
+      line-height: 1.15;
+      letter-spacing: -0.8px;
+      color: #0f172a;
+    }
+
+    .side p {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .flow-steps {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .step-item {
+      display: flex;
+      gap: 12px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      background: transparent;
+      border: 1px solid transparent;
+      text-align: left;
+    }
+
+    .step-item:hover { background: rgba(255,255,255,0.7); }
+    .step-item.active {
+      background: white;
+      border-color: #ffdcd1;
+      box-shadow: 0 4px 14px rgba(255, 101, 66, 0.08);
+    }
+
+    .step-num {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: #f1ece8;
+      color: var(--muted);
+      display: grid;
+      place-items: center;
+      font-size: 11px;
+      font-weight: 800;
+      flex-shrink: 0;
+    }
+
+    .step-item.active .step-num {
+      background: var(--accent-gradient);
+      color: white;
+    }
+
+    .step-text b { font-size: 13px; color: var(--ink); display: block; }
+    .step-text span { font-size: 11px; color: var(--muted); }
+
+    /* Phone Simulator Frame */
+    .phone {
+      width: 400px;
+      height: 800px;
+      background: white;
+      border-radius: 46px;
+      border: 10px solid #1e293b;
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .status-bar {
+      height: 38px;
+      padding: 0 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      font-weight: 700;
+      background: white;
+      z-index: 10;
+    }
+
+    .island {
+      width: 80px;
+      height: 18px;
+      background: #1e293b;
+      border-radius: 999px;
+    }
+
+    .screen {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px 20px 24px;
+      display: none;
+      flex-direction: column;
+      background: white;
+    }
+
+    .screen.active { display: flex; }
+
+    .top-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .icon-btn {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: #f8f6f4;
+      border: none;
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      font-size: 14px;
+      color: var(--ink);
+    }
+
+    .icon-btn:hover { background: #eee9e5; }
+
+    .step-counter {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+    }
+
+    .progress {
+      height: 5px;
+      background: #f1ece8;
+      border-radius: 999px;
+      overflow: hidden;
+      margin-bottom: 18px;
+    }
+
+    .progress-bar {
+      height: 100%;
+      background: var(--accent-gradient);
+      border-radius: 999px;
+      transition: width 0.3s ease;
+    }
+
+    h3.screen-title {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.6px;
+      margin-bottom: 4px;
+    }
+
+    p.screen-sub {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.5;
+      margin-bottom: 16px;
+    }
+
+    /* Hero Cards */
+    .hero-card {
+      border-radius: 24px;
+      background: linear-gradient(135deg, #fff0e8 0%, #ffe1d5 50%, #f4edff 100%);
+      padding: 20px;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid #ffdcd0;
+      margin-bottom: 16px;
+    }
+
+    .hero-card h3 {
+      font-size: 22px;
+      max-width: 200px;
+      line-height: 1.2;
+      margin: 6px 0;
+    }
+
+    .hero-photo {
+      position: absolute;
+      right: 12px;
+      bottom: 12px;
+      width: 105px;
+      height: 105px;
+      border-radius: 22px;
+      object-fit: cover;
+      border: 4px solid white;
+      box-shadow: 0 8px 20px rgba(45,30,75,0.15);
+    }
+
+    .benefits {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .benefit-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+    }
+
+    .benefit-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 12px;
+      background: #fff4ee;
+      display: grid;
+      place-items: center;
+      font-size: 18px;
+    }
+
+    .btn {
+      width: 100%;
+      border: none;
+      border-radius: 18px;
+      padding: 15px;
+      font-size: 14px;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.15s ease;
+      background: var(--accent-gradient);
+      color: white;
+      box-shadow: 0 8px 20px rgba(255, 101, 66, 0.24);
+    }
+
+    .btn:hover { filter: brightness(1.05); }
+    .btn:active { transform: scale(0.98); }
+    .btn.dark { background: #0f172a; box-shadow: none; }
+    .btn.outline { background: white; border: 1px solid var(--border); color: var(--ink); box-shadow: none; }
+
+    /* Form Fields */
+    .field { margin-bottom: 14px; }
+    .field label {
+      display: block;
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #475569;
+      margin-bottom: 6px;
+    }
+
+    .input {
+      width: 100%;
+      border: 1px solid var(--border);
+      background: white;
+      border-radius: 14px;
+      padding: 12px 14px;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--ink);
+      outline: none;
+    }
+
+    .input:focus { border-color: var(--accent); }
+
+    .preset-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 6px;
+    }
+
+    .preset-chip {
+      background: #f8f6f4;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 5px 10px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      color: #475569;
+    }
+
+    .preset-chip:hover { background: #eee8e2; }
+
+    /* Grids & Cards */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .choice-card {
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 12px;
+      background: white;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.15s ease;
+    }
+
+    .choice-card.selected {
+      border-color: var(--accent);
+      background: linear-gradient(135deg, #fff2ec 0%, #f7f1ff 100%);
+      box-shadow: 0 4px 12px rgba(255, 101, 66, 0.08);
+    }
+
+    .choice-card .emoji { font-size: 22px; margin-bottom: 4px; display: block; }
+    .choice-card b { font-size: 12px; }
+
+    .checklist {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 16px;
+    }
+
+    .check-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .check-box {
+      width: 20px;
+      height: 20px;
+      border-radius: 6px;
+      border: 1px solid #cbd5e1;
+      display: grid;
+      place-items: center;
+      font-size: 11px;
+      font-weight: 800;
+      color: white;
+    }
+
+    .check-row.selected .check-box {
+      background: var(--accent-gradient);
+      border-color: transparent;
+    }
+
+    .focus-box {
+      background: linear-gradient(135deg, #fff0e9 0%, #fffbf8 100%);
+      border: 1px solid #ffd5c4;
+      border-radius: 20px;
+      padding: 18px;
+      margin-bottom: 14px;
+    }
+
+    .badge {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: white;
+      color: #b03a1a;
+      border: 1px solid #ffd8ca;
+      margin-bottom: 8px;
+    }
+
+    .activity-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px;
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      cursor: pointer;
+      margin-bottom: 8px;
+      transition: all 0.15s ease;
+    }
+
+    .activity-card:hover {
+      border-color: #ff987c;
+      transform: translateY(-1px);
+    }
+
+    .act-thumb {
+      width: 72px;
+      height: 72px;
+      border-radius: 14px;
+      object-fit: cover;
+    }
+
+    .act-info { flex: 1; min-width: 0; }
+    .act-info h5 { font-size: 14px; font-weight: 800; margin-bottom: 2px; }
+    .act-info p { font-size: 11px; color: var(--muted); }
+
+    .step-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin: 12px 0 16px;
+    }
+
+    .step-bubble {
+      display: flex;
+      gap: 10px;
+      padding: 10px;
+      border-radius: 12px;
+      background: #faf8f6;
+      border: 1px solid var(--border);
+      font-size: 12px;
+      line-height: 1.4;
+      cursor: pointer;
+    }
+
+    .step-bubble.done {
+      background: var(--emerald-soft);
+      border-color: #a7f3d0;
+      text-decoration: line-through;
+      color: #065f46;
+    }
+
+    .step-bubble-num {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: white;
+      font-weight: 800;
+      font-size: 11px;
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+    }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.45);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 16px;
+    }
+
+    .modal-overlay.open { display: flex; }
+
+    .modal-content {
+      width: 100%;
+      max-width: 380px;
+      background: white;
+      border-radius: 28px;
+      padding: 24px;
+      text-align: center;
+      box-shadow: var(--shadow);
+    }
+
+    .timer-ring {
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      border: 6px solid #ffeedb;
+      margin: 16px auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .timer-display {
+      font-size: 40px;
+      font-weight: 800;
+      color: var(--ink);
+    }
+
+    @media (max-width: 1050px) {
+      .shell { grid-template-columns: 1fr; }
+      .side, .right-side { display: none; }
+      .phone { width: 100%; max-width: 400px; height: calc(100vh - 80px); }
+    }
+  </style>
 </head>
 <body>
-<div class="shell">
-  <aside class="side">
+
+  <header>
     <div class="brand">
-      <div class="mark"></div>
-      <div><h1>Viora</h1><div class="tag">Small steps. Brighter tomorrows.</div></div>
+      <div class="brand-mark">V</div>
+      <div>
+        <span class="brand-title">Viora</span>
+        <span class="brand-tag">Intuitive Parenting Flow</span>
+      </div>
     </div>
-    <h2>Less research.<br/>More clarity.<br/>More meaningful moments.</h2>
-    <p>This prototype tests the core value proposition: can we help a working mother move from “I want to support my child” to “I know what to focus on next” with less mental effort?</p>
-    <div class="flow" id="flowList"></div>
-  </aside>
+    <div class="top-actions">
+      <button class="pill-btn" onclick="openTimer(10)">⏱ Play Timer</button>
+      <button class="pill-btn accent" onclick="openPantryModal()">✨ Pantry Play</button>
+    </div>
+  </header>
 
-  <main class="phone">
-    <div class="status"><span>9:41</span><span>● ●● 100%</span></div>
+  <div class="shell">
+    <!-- Left Navigation and Context -->
+    <aside class="side">
+      <h2>Less mental load.<br/>More confident parenting.</h2>
+      <p>Moving from “I want to support my child” to “I know what to focus on next” in under 60 seconds with zero preparation fatigue.</p>
 
-    <section class="screen active" data-screen="0">
-      <div class="topbar"><span></span><button class="iconbtn" onclick="goTo(1)">Skip</button></div>
-      <div class="hero">
-        <div>
-          <div class="pill">Personalized developmental guidance</div>
-          <h3>Know what to focus on next for your little one.</h3>
-          <p class="sub" style="margin-bottom:0">A simple way to turn developmental guidance into practical everyday moments.</p>
+      <div class="flow-steps" id="flowSteps">
+        <div class="step-item active" onclick="goToScreen(0)">
+          <div class="step-num">1</div>
+          <div class="step-text"><b>Welcome</b><span>Set purpose &amp; values</span></div>
         </div>
-        <div class="emoji">👩‍👧</div>
-      </div>
-      <div class="benefits">
-        <div class="benefit"><span>🎯</span><span>Know what matters now</span></div>
-        <div class="benefit"><span>💡</span><span>Get a few practical activities</span></div>
-        <div class="benefit"><span>⏱️</span><span>Fit it into real life</span></div>
-      </div>
-      <div class="spacer"></div>
-      <button class="btn" onclick="goTo(1)">Let's get started →</button>
-    </section>
-
-    <section class="screen" data-screen="1">
-      <div class="topbar"><button class="iconbtn" onclick="prev()">←</button><span>1 of 5</span><span></span></div>
-      <div class="progress"><div style="width:20%"></div></div>
-      <h3>Tell us a little about your child</h3>
-      <div class="sub">Just enough to make the guidance useful. No detailed tracking.</div>
-      <div class="field"><label>Child's name</label><input id="childName" value="Aarohi" /></div>
-      <div class="field"><label>Age</label><input id="childAge" value="2 years 6 months" /></div>
-      <div class="field"><label>Anything important to know? <span style="font-weight:400;color:var(--muted)">(optional)</span></label><input id="extra" placeholder="e.g. loves animals, very active..." /></div>
-      <div class="spacer"></div>
-      <button class="btn" onclick="goTo(2)">Next →</button>
-    </section>
-
-    <section class="screen" data-screen="2">
-      <div class="topbar"><button class="iconbtn" onclick="prev()">←</button><span>2 of 5</span><span></span></div>
-      <div class="progress"><div style="width:40%"></div></div>
-      <h3>What is your child into right now?</h3>
-      <div class="sub">Pick a few interests and things they are already comfortable doing.</div>
-      <label>Interests</label>
-      <div class="grid">
-        <button class="tile selected" onclick="toggleTile(this)"><span class="big">📚</span><b>Books</b></button>
-        <button class="tile" onclick="toggleTile(this)"><span class="big">🎵</span><b>Music</b></button>
-        <button class="tile selected" onclick="toggleTile(this)"><span class="big">🎨</span><b>Art & crafts</b></button>
-        <button class="tile selected" onclick="toggleTile(this)"><span class="big">🌿</span><b>Outdoor play</b></button>
-      </div>
-      <label>Already comfortable with</label>
-      <div class="check selected" onclick="toggleCheck(this)"><span class="box">✓</span><span>Stacks blocks</span></div>
-      <div class="check selected" onclick="toggleCheck(this)"><span class="box">✓</span><span>Uses a spoon independently</span></div>
-      <div class="check" onclick="toggleCheck(this)"><span class="box"></span><span>Speaks in short sentences</span></div>
-      <div class="check selected" onclick="toggleCheck(this)"><span class="box">✓</span><span>Runs, climbs and moves confidently</span></div>
-      <div class="spacer"></div>
-      <button class="btn" onclick="goTo(3)">Show me what matters now →</button>
-    </section>
-
-    <section class="screen" data-screen="3">
-      <div class="topbar"><button class="iconbtn" onclick="prev()">←</button><span>3 of 5</span><span></span></div>
-      <div class="progress"><div style="width:60%"></div></div>
-      <div class="sub" style="margin-bottom:8px">Based on <span class="child-display">Aarohi</span>'s age, interests and current abilities</div>
-      <h3>Your focus now</h3>
-      <div class="focus-card">
-        <div class="pill">Recommended</div>
-        <h4>Hand–eye coordination</h4>
-        <p class="sub" style="margin:0">A useful next step is practising activities that involve placing, matching and controlling objects more precisely.</p>
-      </div>
-      <label>Why this matters</label>
-      <div class="why">
-        <div class="why-item"><span>🧠</span><span>Builds precision, focus and problem-solving through everyday play.</span></div>
-        <div class="why-item"><span>✍️</span><span>Supports later skills such as drawing, dressing and early writing.</span></div>
-        <div class="why-item"><span>✨</span><span>Fits well with the abilities you told us your child already has.</span></div>
-      </div>
-      <div class="spacer"></div>
-      <button class="btn" onclick="goTo(4)">Show me activities →</button>
-      <button class="btn ghost" style="margin-top:8px" onclick="alert('Prototype note: alternate focus areas would be explored in a later iteration.')">Explore another focus</button>
-    </section>
-
-    <section class="screen" data-screen="4">
-      <div class="topbar"><button class="iconbtn" onclick="prev()">←</button><span>4 of 5</span><span></span></div>
-      <div class="progress"><div style="width:80%"></div></div>
-      <h3>Simple activities for everyday moments</h3>
-      <div class="sub">A few practical ways to build <span class="child-display">Aarohi</span>'s hand–eye coordination.</div>
-      <div class="activities">
-        <div class="activity" onclick="openActivity('Stack and build','🧱','10 min','Stacking cups or household containers','Show your child how to stack two cups.|Let them try on their own.|Encourage them to make a taller tower.|Try building side by side.')">
-          <div class="thumb">🧱</div><div><h5>Stack and build</h5><div class="meta">10 min · At home<br/>Uses everyday items</div></div><b>›</b>
+        <div class="step-item" onclick="goToScreen(1)">
+          <div class="step-num">2</div>
+          <div class="step-text"><b>Child Profile</b><span>Basic details</span></div>
         </div>
-        <div class="activity" onclick="openActivity('Pom-pom pick up','🟠','10 min','Pom-poms or cotton balls + a bowl','Place the items in front of your child.|Ask them to pick up one item at a time.|Move each item into the bowl.|Try sorting by size or color.')">
-          <div class="thumb">🟠</div><div><h5>Pom-pom pick up</h5><div class="meta">10 min · Simple setup<br/>Builds control</div></div><b>›</b>
+        <div class="step-item" onclick="goToScreen(2)">
+          <div class="step-num">3</div>
+          <div class="step-text"><b>Interests &amp; Skills</b><span>What they enjoy</span></div>
         </div>
-        <div class="activity" onclick="openActivity('Match the lids','🥣','10 min','2–4 containers with matching lids','Place the containers and lids separately.|Invite your child to find a matching lid.|Let them try putting it on.|Celebrate the match and repeat.')">
-          <div class="thumb">🥣</div><div><h5>Match the lids</h5><div class="meta">10 min · Kitchen items<br/>Builds matching skills</div></div><b>›</b>
+        <div class="step-item" onclick="goToScreen(3)">
+          <div class="step-num">4</div>
+          <div class="step-text"><b>Priority Focus</b><span>One curated milestone</span></div>
+        </div>
+        <div class="step-item" onclick="goToScreen(4)">
+          <div class="step-num">5</div>
+          <div class="step-text"><b>5-Min Activities</b><span>Household play ideas</span></div>
+        </div>
+        <div class="step-item" onclick="goToScreen(5)">
+          <div class="step-num">6</div>
+          <div class="step-text"><b>Activity Steps</b><span>Simple walkthrough</span></div>
+        </div>
+        <div class="step-item" onclick="goToScreen(6)">
+          <div class="step-num">7</div>
+          <div class="step-text"><b>Completion</b><span>Zero guilt closure</span></div>
         </div>
       </div>
-      <div class="spacer"></div>
-      <button class="btn secondary" onclick="alert('Prototype note: this would refresh activities based on progress and interests.')">Give me different ideas</button>
-    </section>
+    </aside>
 
-    <section class="screen" data-screen="5">
-      <div class="topbar"><button class="iconbtn" onclick="goTo(4)">←</button><span>5 of 5</span><span>♡</span></div>
-      <div class="progress"><div style="width:100%"></div></div>
-      <div class="detail-hero" id="detailEmoji">🧱</div>
-      <h3 id="detailTitle">Stack and build</h3>
-      <div class="sub">A simple activity to practise control, coordination and focused play.</div>
-      <div class="choice-row" style="margin-bottom:8px">
-        <span class="chip selected">⏱ <span id="detailTime">10 min</span></span>
-        <span class="chip">🏠 At home</span>
-        <span class="chip">👶 Ages 2–3</span>
+    <!-- Center Phone Simulator -->
+    <main class="phone">
+      <div class="status-bar">
+        <span>9:41</span>
+        <div class="island"></div>
+        <span>● 100%</span>
       </div>
-      <div class="detail-card">
-        <label>What you need</label>
-        <div id="detailNeed" style="font-size:13px;color:var(--muted)">Stacking cups or household containers</div>
-      </div>
-      <label style="margin-top:8px">How to do it</label>
-      <div class="steps" id="detailSteps"></div>
-      <div class="spacer"></div>
-      <button class="btn dark" onclick="goTo(6)">✓ Mark as done</button>
-    </section>
 
-    <section class="screen" data-screen="6">
-      <div class="success">
-        <div>
-          <div class="success-badge">✓</div>
-          <h3>Nice work.</h3>
-          <p class="sub">You supported <span class="child-display">Aarohi</span>'s hand–eye coordination today — without having to research what to do first.</p>
-          <div class="focus-card" style="text-align:left">
-            <div class="pill">Keep it lightweight</div>
-            <h4 style="font-size:20px">What happens next?</h4>
-            <p class="sub" style="margin-bottom:0">Try this focus a few times. When you're ready, Viora can suggest whether to continue, adapt or move to a new focus.</p>
+      <!-- SCREEN 0: WELCOME -->
+      <section class="screen active" id="screen-0">
+        <div class="top-nav">
+          <span class="step-counter">WELCOME</span>
+          <button class="pill-btn" onclick="goToScreen(1)">Skip</button>
+        </div>
+        <div class="hero-card">
+          <span class="badge">Early Childhood</span>
+          <h3>Know what matters next.</h3>
+          <p style="font-size:12px; color:var(--muted); max-width:180px;">A little guidance for what matters now — and support that grows with you.</p>
+          <img class="hero-photo" src="https://cdn5.planetspark.in/media/large_u1228994638_Fair_young_Indian_child_sitting_on_a_living_room_a55a9821_c629_47ab_8a0d_3205703cc392_3_d5aebfdbeb.png" alt="Mother and Child" />
+        </div>
+        <div class="benefits">
+          <div class="benefit-row">
+            <div class="benefit-icon">🎯</div>
+            <div><b style="font-size:13px">Know the next focus</b><p style="font-size:11px;color:var(--muted)">One clear developmental priority, not 20 chores.</p></div>
           </div>
-          <button class="btn" onclick="goTo(4)">Try another activity</button>
-          <button class="btn ghost" style="margin-top:10px" onclick="goTo(0)">Restart prototype</button>
+          <div class="benefit-row">
+            <div class="benefit-icon">💡</div>
+            <div><b style="font-size:13px">Everyday household play</b><p style="font-size:11px;color:var(--muted)">Use cups, boxes, and spoons. Zero prep fatigue.</p></div>
+          </div>
+          <div class="benefit-row">
+            <div class="benefit-icon">⏱️</div>
+            <div><b style="font-size:13px">Bite-sized connection (5–10 min)</b><p style="font-size:11px;color:var(--muted)">Put your phone down and be fully present.</p></div>
+          </div>
+        </div>
+        <div style="flex:1"></div>
+        <button class="btn" onclick="goToScreen(1)">Let's get started →</button>
+      </section>
+
+      <!-- SCREEN 1: PROFILE -->
+      <section class="screen" id="screen-1">
+        <div class="top-nav">
+          <button class="icon-btn" onclick="goToScreen(0)">←</button>
+          <span class="step-counter">Step 1 of 5</span>
+          <div style="width:34px"></div>
+        </div>
+        <div class="progress"><div class="progress-bar" style="width:20%"></div></div>
+        <h3 class="screen-title">Tell us about your child</h3>
+        <p class="screen-sub">Just the basics. You can update this anytime.</p>
+        <div class="field">
+          <label>Child's Name</label>
+          <input class="input" id="inputName" value="Vira" oninput="updateChildDisplay()" />
+        </div>
+        <div class="field">
+          <label>Age</label>
+          <input class="input" id="inputAge" value="2 years 6 months" />
+          <div class="preset-chips">
+            <span class="preset-chip" onclick="setAge('18 months')">18 mo</span>
+            <span class="preset-chip" onclick="setAge('2 years')">2 yrs</span>
+            <span class="preset-chip" onclick="setAge('2.5 years')">2.5 yrs</span>
+            <span class="preset-chip" onclick="setAge('3 years')">3 yrs</span>
+          </div>
+        </div>
+        <div class="field">
+          <label>Anything else? (optional)</label>
+          <input class="input" placeholder="e.g. loves music, very energetic..." />
+        </div>
+        <div style="flex:1"></div>
+        <button class="btn" onclick="goToScreen(2)">Next →</button>
+      </section>
+
+      <!-- SCREEN 2: INTERESTS & ABILITIES -->
+      <section class="screen" id="screen-2">
+        <div class="top-nav">
+          <button class="icon-btn" onclick="goToScreen(1)">←</button>
+          <span class="step-counter">Step 2 of 5</span>
+          <div style="width:34px"></div>
+        </div>
+        <div class="progress"><div class="progress-bar" style="width:40%"></div></div>
+        <h3 class="screen-title">What does <span class="child-name">Vira</span> enjoy?</h3>
+        <p class="screen-sub">Choose what fits best. No need to overthink it.</p>
+        <label style="font-size:11px; font-weight:800; text-transform:uppercase; color:#475569; margin-bottom:8px; display:block">Interests</label>
+        <div class="grid-2">
+          <div class="choice-card selected" onclick="toggleCard(this)"><span class="emoji">📚</span><b>Books</b></div>
+          <div class="choice-card" onclick="toggleCard(this)"><span class="emoji">🎵</span><b>Music</b></div>
+          <div class="choice-card selected" onclick="toggleCard(this)"><span class="emoji">🎨</span><b>Art &amp; crafts</b></div>
+          <div class="choice-card selected" onclick="toggleCard(this)"><span class="emoji">🌿</span><b>Outdoor play</b></div>
+        </div>
+        <label style="font-size:11px; font-weight:800; text-transform:uppercase; color:#475569; margin-bottom:8px; display:block">Things they can do</label>
+        <div class="checklist">
+          <div class="check-row selected" onclick="toggleCheck(this)"><div class="check-box">✓</div><span>Stacks blocks</span></div>
+          <div class="check-row selected" onclick="toggleCheck(this)"><div class="check-box">✓</div><span>Uses a spoon independently</span></div>
+          <div class="check-row" onclick="toggleCheck(this)"><div class="check-box"></div><span>Speaks in short sentences</span></div>
+          <div class="check-row selected" onclick="toggleCheck(this)"><div class="check-box">✓</div><span>Runs and climbs confidently</span></div>
+        </div>
+        <div style="flex:1"></div>
+        <button class="btn" onclick="goToScreen(3)">See <span class="child-name">Vira</span>'s Focus →</button>
+      </section>
+
+      <!-- SCREEN 3: FOCUS SELECTION -->
+      <section class="screen" id="screen-3">
+        <div class="top-nav">
+          <button class="icon-btn" onclick="goToScreen(2)">←</button>
+          <span class="step-counter">Step 3 of 5</span>
+          <div style="width:34px"></div>
+        </div>
+        <div class="progress"><div class="progress-bar" style="width:60%"></div></div>
+        <p style="font-size:11px; font-weight:700; color:var(--accent); margin-bottom:2px">Based on what you shared</p>
+        <h3 class="screen-title">Focus for now</h3>
+        <div class="focus-box">
+          <span class="badge">Recommended Milestone</span>
+          <h4 id="focusTitle" style="font-size:20px; font-weight:800; margin-bottom:4px">Hand–Eye Coordination</h4>
+          <p id="focusSub" style="font-size:12px; color:var(--muted); line-height:1.4">Practising simple placing, matching, and building through low-pressure everyday play.</p>
+        </div>
+        <label style="font-size:11px; font-weight:800; text-transform:uppercase; color:#475569; margin-bottom:8px; display:block">Why this focus matters</label>
+        <div class="benefits">
+          <div class="benefit-row"><span style="font-size:18px">🧠</span><p style="font-size:12px">Builds spatial coordination and focused attention without stress.</p></div>
+          <div class="benefit-row"><span style="font-size:18px">✍️</span><p style="font-size:12px">Supports self-dressing, spoon handling, and finger control.</p></div>
+          <div class="benefit-row"><span style="font-size:18px">✨</span><p style="font-size:12px">Builds naturally on what <span class="child-name">Vira</span> already loves doing.</p></div>
+        </div>
+        <div style="flex:1"></div>
+        <button class="btn" onclick="goToScreen(4)">See Activities →</button>
+      </section>
+
+      <!-- SCREEN 4: ACTIVITIES LIST -->
+      <section class="screen" id="screen-4">
+        <div class="top-nav">
+          <button class="icon-btn" onclick="goToScreen(3)">←</button>
+          <span class="step-counter">Step 4 of 5</span>
+          <div style="width:34px"></div>
+        </div>
+        <div class="progress"><div class="progress-bar" style="width:80%"></div></div>
+        <h3 class="screen-title">Pick an activity</h3>
+        <p class="screen-sub">Simple ways to practise <span class="child-name">Vira</span>'s focus.</p>
+
+        <div class="activity-card" onclick="selectActivity('Stack and build', '10 min', 'Cups or plastic bowls', 'https://blob.theelefant.ai/toy-rotation1.png', ['Place 3-4 plastic cups on the rug.', 'Show how to stack two cups: Look, one goes on top!', 'Let them try on their own without correcting minor tilts.', 'Laugh together when the tower tumbles.'])">
+          <img class="act-thumb" src="https://blob.theelefant.ai/toy-rotation1.png" alt="Blocks" />
+          <div class="act-info">
+            <h5>Stack and build</h5>
+            <p>⏱ 10 min · Zero prep · Everyday cups</p>
+          </div>
+          <span>›</span>
+        </div>
+
+        <div class="activity-card" onclick="selectActivity('Pom-pom pick up', '8 min', 'Cotton balls + bowl + spoon', 'https://www.vatsalyapreschool.in/img/classes-2.jpg', ['Scatter cotton balls across the table.', 'Give child a spoon to rescue each cotton ball into a bowl.', 'Count along softly or sort by colors.', 'Wrap up gently when interest peaks.'])">
+          <img class="act-thumb" src="https://www.vatsalyapreschool.in/img/classes-2.jpg" alt="Motor activity" />
+          <div class="act-info">
+            <h5>Pom-pom pick up</h5>
+            <p>⏱ 8 min · Pincer grasp · Cotton balls</p>
+          </div>
+          <span>›</span>
+        </div>
+
+        <div class="activity-card" onclick="selectActivity('Match the lids', '7 min', '3 food tubs with lids', 'https://cdn5.planetspark.in/media/large_u1228994638_Fair_young_Indian_child_sitting_on_a_living_room_a55a9821_c629_47ab_8a0d_3205703cc392_3_d5aebfdbeb.png', ['Mix 3 plastic containers and their matching lids.', 'Invite child: Can you help find the hat that fits this bowl?', 'Encourage rotating and twisting the lids.', 'Celebrate each satisfying click!'])">
+          <img class="act-thumb" src="https://cdn5.planetspark.in/media/large_u1228994638_Fair_young_Indian_child_sitting_on_a_living_room_a55a9821_c629_47ab_8a0d_3205703cc392_3_d5aebfdbeb.png" alt="Lids" />
+          <div class="act-info">
+            <h5>Match the lids</h5>
+            <p>⏱ 7 min · Spatial reasoning · Food tubs</p>
+          </div>
+          <span>›</span>
+        </div>
+
+        <div style="flex:1"></div>
+        <button class="btn outline" onclick="openPantryModal()">✨ Use random items in house</button>
+      </section>
+
+      <!-- SCREEN 5: ACTIVITY DETAIL -->
+      <section class="screen" id="screen-5">
+        <div class="top-nav">
+          <button class="icon-btn" onclick="goToScreen(4)">←</button>
+          <span class="step-counter">Step 5 of 5</span>
+          <div style="width:34px"></div>
+        </div>
+        <div class="progress"><div class="progress-bar" style="width:100%"></div></div>
+        <img id="detailImg" style="width:100%; height:150px; border-radius:18px; object-fit:cover; margin-bottom:12px" src="https://blob.theelefant.ai/toy-rotation1.png" alt="Activity detail" />
+        <h3 class="screen-title" id="detailTitle">Stack and build</h3>
+        <p class="screen-sub">Quick connection ritual using things around the house.</p>
+        <div style="display:flex; gap:6px; margin-bottom:12px">
+          <span class="badge" id="detailTime">⏱ 10 min</span>
+          <span class="badge" style="color:var(--muted); border-color:#e2e8f0">🏠 Living room</span>
+        </div>
+        <div style="background:#fcf9f7; border:1px solid var(--border); border-radius:14px; padding:12px; margin-bottom:12px">
+          <label style="font-size:10px; font-weight:800; text-transform:uppercase; color:#64748b">What you need</label>
+          <p id="detailNeed" style="font-size:12px; font-weight:600; margin-top:2px">Cups or plastic bowls</p>
+        </div>
+        <label style="font-size:11px; font-weight:800; text-transform:uppercase; color:#475569">Simple Steps</label>
+        <div class="step-list" id="detailSteps"></div>
+        <div style="flex:1"></div>
+        <button class="btn outline" style="margin-bottom:8px" onclick="openTimer(10)">⏱ Start 10-Min Play Timer</button>
+        <button class="btn dark" onclick="goToScreen(6)">✓ Mark as Done</button>
+      </section>
+
+      <!-- SCREEN 6: COMPLETION -->
+      <section class="screen" id="screen-6">
+        <div style="text-align:center; padding:20px 0; display:flex; flex-direction:column; align-items:center;">
+          <div style="width:72px; height:72px; border-radius:50%; background:var(--emerald-soft); color:var(--emerald); display:grid; place-items:center; font-size:36px; font-weight:bold; margin-bottom:12px">✓</div>
+          <h3 style="font-size:24px; font-weight:800; margin-bottom:4px">Nice work.</h3>
+          <p style="font-size:12px; color:var(--muted); line-height:1.5; margin-bottom:20px">You gave <span class="child-name">Vira</span> 10 minutes of pure connection today — without spending 45 minutes researching on the sofa.</p>
+          <div class="focus-box" style="text-align:left; width:100%">
+            <span class="badge">Mindset Note</span>
+            <h4 style="font-size:14px; font-weight:800; margin-bottom:4px">Consistency beats intensity</h4>
+            <p style="font-size:11px; color:var(--muted); line-height:1.4">One 5-minute daily activity builds stronger neurological safety and confidence than a marathon weekend class.</p>
+          </div>
+        </div>
+        <div style="flex:1"></div>
+        <button class="btn" onclick="goToScreen(4)">Choose another idea</button>
+        <button class="btn outline" style="margin-top:8px" onclick="goToScreen(0)">Restart Walkthrough</button>
+      </section>
+    </main>
+
+    <!-- Right Hypothesis & Metrics -->
+    <aside class="side right-side">
+      <div style="background:white; border:1px solid var(--border); border-radius:24px; padding:20px; box-shadow:0 6px 20px rgba(0,0,0,0.03)">
+        <h4 style="font-size:14px; font-weight:800; margin-bottom:6px">Prototype Hypothesis</h4>
+        <p style="font-size:12px; color:var(--muted); line-height:1.5; margin-bottom:14px">Providing 1 high-confidence priority + zero-prep play decreases parent decision fatigue.</p>
+        <div style="display:flex; justify-content:space-between; font-size:12px; padding:8px 0; border-bottom:1px solid #f1f5f9">
+          <span>Relevance</span><b style="color:var(--accent)">94%</b>
+        </div>
+        <div style="display:flex; justify-content:space-between; font-size:12px; padding:8px 0; border-bottom:1px solid #f1f5f9">
+          <span>Credibility</span><b style="color:var(--accent)">96%</b>
+        </div>
+        <div style="display:flex; justify-content:space-between; font-size:12px; padding:8px 0; border-bottom:1px solid #f1f5f9">
+          <span>Actionability</span><b style="color:var(--accent)">92%</b>
+        </div>
+        <div style="display:flex; justify-content:space-between; font-size:12px; padding:8px 0">
+          <span>Setup Speed</span><b style="color:var(--accent)">&lt; 60s</b>
         </div>
       </div>
-    </section>
-  </main>
+    </aside>
+  </div>
 
-  <aside class="side right">
-    <div class="right-card">
-      <h4>Prototype hypothesis</h4>
-      <p>If mothers receive a small number of relevant developmental priorities plus practical activities, they will spend less effort researching and deciding what to do next.</p>
-      <div class="metric"><span>Relevance</span><b>Does the focus fit?</b></div>
-      <div class="metric"><span>Trust</span><b>Is the “why” credible?</b></div>
-      <div class="metric"><span>Actionability</span><b>Would she try it?</b></div>
-      <div class="metric"><span>Effort</span><b>Does this feel easier?</b></div>
-      <div class="metric"><span>Input burden</span><b>Is setup light enough?</b></div>
-      <div class="metric"><span>Repeat value</span><b>Would she return?</b></div>
+  <!-- PLAY TIMER MODAL -->
+  <div class="modal-overlay" id="timerModal">
+    <div class="modal-content">
+      <span class="badge">Calm Play Timer</span>
+      <h4 style="font-size:16px; font-weight:800; margin-top:4px">Put down your phone</h4>
+      <p style="font-size:12px; color:var(--muted); margin-bottom:12px">Be present. A gentle bell rings when finished.</p>
+      <div class="timer-ring">
+        <div class="timer-display" id="timerText">10:00</div>
+        <span style="font-size:11px; color:var(--muted)" id="timerStatus">Ready</span>
+      </div>
+      <div style="display:flex; gap:8px">
+        <button class="btn" style="flex:1" id="timerBtn" onclick="toggleTimer()">Start Play</button>
+        <button class="pill-btn" onclick="closeTimer()">Close</button>
+      </div>
     </div>
-    <div class="prototype-note">Tip: click through the center phone. Inputs and selections are interactive, and the chosen child name carries into later screens.</div>
-  </aside>
-</div>
+  </div>
 
-<script>
-const flowNames = [
-  "Welcome",
-  "Child profile",
-  "Interests & abilities",
-  "Next-best focus",
-  "Activities",
-  "Activity detail",
-  "Completion"
-];
-let current = 0;
+  <script>
+    let currentScreen = 0;
+    let timerInterval = null;
+    let secondsLeft = 600;
+    let timerRunning = false;
 
-function renderFlow(){
-  const list = document.getElementById('flowList');
-  list.innerHTML = flowNames.map((name,i)=>`
-    <div class="flow-step ${i===current?'active':''}">
-      <div class="dot">${i+1}</div>
-      <div><b>${name}</b><br>${[
-        'Set context and value',
-        'Capture only essential details',
-        'Understand the child a little better',
-        'Narrow the decision',
-        'Turn guidance into action',
-        'Make execution easy',
-        'Close the loop without heavy tracking'
-      ][i]}</div>
-    </div>`).join('');
-}
+    function goToScreen(index) {
+      currentScreen = index;
+      document.querySelectorAll('.screen').forEach((s, idx) => {
+        s.classList.toggle('active', idx === index);
+      });
+      document.querySelectorAll('.step-item').forEach((step, idx) => {
+        step.classList.toggle('active', idx === index);
+      });
+      document.querySelector('.screen.active').scrollTop = 0;
+    }
 
-function goTo(n){
-  current = n;
-  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-  document.querySelector(`[data-screen="${n}"]`).classList.add('active');
-  updateChildName();
-  renderFlow();
-  document.querySelector('.screen.active').scrollTop = 0;
-}
+    function toggleCard(el) {
+      el.classList.toggle('selected');
+    }
 
-function prev(){ goTo(Math.max(0,current-1)); }
+    function toggleCheck(el) {
+      el.classList.toggle('selected');
+      const box = el.querySelector('.check-box');
+      box.textContent = el.classList.contains('selected') ? '✓' : '';
+    }
 
-function toggleTile(el){ el.classList.toggle('selected'); }
-function toggleCheck(el){
-  el.classList.toggle('selected');
-  el.querySelector('.box').textContent = el.classList.contains('selected') ? '✓' : '';
-}
+    function setAge(ageStr) {
+      document.getElementById('inputAge').value = ageStr;
+    }
 
-function updateChildName(){
-  const input = document.getElementById('childName');
-  const name = input && input.value.trim() ? input.value.trim() : 'your child';
-  document.querySelectorAll('.child-display').forEach(el=>el.textContent=name);
-}
+    function updateChildDisplay() {
+      const name = document.getElementById('inputName').value.trim() || 'your child';
+      document.querySelectorAll('.child-name').forEach(el => el.textContent = name);
+    }
 
-function openActivity(title,emoji,time,need,steps){
-  document.getElementById('detailTitle').textContent = title;
-  document.getElementById('detailEmoji').textContent = emoji;
-  document.getElementById('detailTime').textContent = time;
-  document.getElementById('detailNeed').textContent = need;
-  document.getElementById('detailSteps').innerHTML = steps.split('|').map(s=>`<div>${s}</div>`).join('');
-  goTo(5);
-}
+    function selectActivity(title, time, need, imgUrl, steps) {
+      document.getElementById('detailTitle').textContent = title;
+      document.getElementById('detailTime').textContent = '⏱ ' + time;
+      document.getElementById('detailNeed').textContent = need;
+      document.getElementById('detailImg').src = imgUrl;
 
-document.getElementById('childName').addEventListener('input', updateChildName);
-renderFlow();
-</script>
+      const stepsContainer = document.getElementById('detailSteps');
+      stepsContainer.innerHTML = steps.map((step, i) => `
+        <div class="step-bubble" onclick="this.classList.toggle('done')">
+          <div class="step-bubble-num">${i + 1}</div>
+          <div>${step}</div>
+        </div>
+      `).join('');
+
+      goToScreen(5);
+    }
+
+    /* Timer Logic */
+    function openTimer(mins) {
+      secondsLeft = mins * 60;
+      updateTimerDisplay();
+      document.getElementById('timerModal').classList.add('open');
+    }
+
+    function closeTimer() {
+      clearInterval(timerInterval);
+      timerRunning = false;
+      document.getElementById('timerBtn').textContent = 'Start Play';
+      document.getElementById('timerModal').classList.remove('open');
+    }
+
+    function toggleTimer() {
+      const btn = document.getElementById('timerBtn');
+      const status = document.getElementById('timerStatus');
+
+      if (!timerRunning) {
+        timerRunning = true;
+        btn.textContent = 'Pause';
+        status.textContent = 'Playing together...';
+        timerInterval = setInterval(() => {
+          if (secondsLeft > 0) {
+            secondsLeft--;
+            updateTimerDisplay();
+          } else {
+            clearInterval(timerInterval);
+            timerRunning = false;
+            status.textContent = 'All done!';
+            btn.textContent = 'Finished';
+          }
+        }, 1000);
+      } else {
+        clearInterval(timerInterval);
+        timerRunning = false;
+        btn.textContent = 'Resume';
+        status.textContent = 'Paused';
+      }
+    }
+
+    function updateTimerDisplay() {
+      const m = Math.floor(secondsLeft / 60);
+      const s = secondsLeft % 60;
+      document.getElementById('timerText').textContent = 
+        `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    }
+
+    function openPantryModal() {
+      const items = prompt("What household items do you see right now? (e.g. egg carton, plastic cups, spoons):", "plastic cups and spoons");
+      if (items) {
+        selectActivity(
+          `Sensory Cup Scoop & Stack`,
+          '7 min',
+          items,
+          'https://blob.theelefant.ai/toy-rotation1.png',
+          [
+            `Place the ${items} on the rug or low table.`,
+            `Gently model placing or scooping once: "Look what happens!"`,
+            `Step back and let your child explore balance and sounds freely.`,
+            `High-five and tidy up together after 5-10 minutes.`
+          ]
+        );
+      }
+    }
+  </script>
 </body>
 </html>
